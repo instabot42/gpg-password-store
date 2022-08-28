@@ -10,6 +10,7 @@ import editCommand from './commands/edit.js'
 import insertCommand from './commands/insert.js'
 import deleteCommand from './commands/delete.js'
 import defaultCommand from './commands/default.js'
+import backupCommand from './commands/backup.js'
 import generatePasswordCommand from './commands/generate-password.js'
 import listCommand from './commands/list.js'
 
@@ -165,6 +166,13 @@ program
     .alias('l')
     .description('List all the passwords')
     .action(async () => listCommand(extendOptions(program.opts())))
+
+// The List all passwords command
+program
+    .command('backup')
+    .argument('<folder>', 'the name of the entry to lookup')
+    .description('Backup all content to the target folder')
+    .action(async (folder) => backupCommand(folder, extendOptions(program.opts())))
 
 // The Help command
 program
