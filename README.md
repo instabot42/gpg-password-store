@@ -111,6 +111,20 @@ This will open your configured editor to edit the details stored
 
 It will not be stored anywhere.
 
+#### Backup
+
+`pass backup <targetFolder>`
+
+This will collect up all the encrypted files in your password store, bundle them up into a single file, encrypt that and write a date stamped file into the backup folder given.
+Note that none of your encrypted files are decrypted in this process, and all your files are left exactly as they were. You gain a single encrypted file somewhere else that you can save to some off-site storage (external drive, cloud backup etc). As the bundle is encrypted, the file names and folders used in your password store are not revealed.
+
+Note also that there isn't a restore process yet...
+You can decrypt the backup file using the same keypair used by the password store. It is a json file using the following format...
+
+```
+[ { name: 'password name', content: 'encrypted file content' }, ... ]
+```
+
 ### Format
 
 The format used to store passwords is basically the same as in pass, so you can probably also use pass to access and manage your passwords.
