@@ -3,7 +3,6 @@ import * as utils from '../common/file-utils.js'
 import { copyToClipboard } from '../common/clip.js'
 import { encrypt } from '../common/encryption.js'
 import * as input from '../common/input.js'
-import { passwordColoured } from '../common/password-highlight.js'
 
 const term = terminal.terminal
 
