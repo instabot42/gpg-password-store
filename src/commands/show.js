@@ -60,7 +60,7 @@ export default async function showCommand(defaultKey, options) {
 
     // decrypt and enjoy
     const content = utils.readFile(fullPath)
-    const decrypted = await decrypt(content.toString(), options.gpgId)
+    const decrypted = await decrypt(content, options.gpgId)
 
     // Show it
     term.brightWhite(decrypted)

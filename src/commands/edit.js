@@ -13,7 +13,7 @@ export default async function editCommand(defaultName, options) {
     // Find and decrypt the the content
     let fullPath = `${options.baseDir}${utils.pathSeparator()}${entryName}.gpg`
     const content = utils.readFile(fullPath)
-    const decrypted = await decrypt(content.toString(), options.gpgId)
+    const decrypted = await decrypt(content, options.gpgId)
 
     // edit it
     const updated = await editor(decrypted)

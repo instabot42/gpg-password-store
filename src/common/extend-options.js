@@ -4,7 +4,7 @@ import * as utils from './file-utils.js'
 export default function extendOptions(opts) {
     try {
         const baseDir = utils.resolvePath(opts.dir)
-        const gpgIdFileContents = utils.readFile(`${baseDir}${utils.pathSeparator()}.gpgid`).toString()
+        const gpgIdFileContents = utils.readFile(`${baseDir}${utils.pathSeparator()}.gpgid`)
 
         // strip anything except letters etc
         const regex = /[^\w. -]/gi;

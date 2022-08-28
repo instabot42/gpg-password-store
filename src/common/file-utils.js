@@ -76,5 +76,5 @@ export function writeFile(fullpath, content) {
 }
 
 export function readFile(fullpath, content) {
-    return fs.readFileSync(fullpath)
+    return fs.readFileSync(fullpath).toString()
 }
