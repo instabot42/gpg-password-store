@@ -61,11 +61,16 @@ Assumes you have set up an alias...
 
 `pass help`
 
-You'll need to start with `pass init <Name-Of-GPG-Key-To-Use-For-Encryption>` to create the required folder and config.
+#### Set up password store
 
-### Add a new password to the DB
+`pass init <Name-Of-GPG-Key-To-Use-For-Encryption>`
 
-`pass.js insert`
+You'll need to do this before you can use any other commands
+
+
+#### Add a new password to the DB
+
+`pass insert`
 
 Give a name for the entry - this is how you will identify the password in the future
 Enter the username and password.
@@ -73,28 +78,51 @@ Optionally add some additional text that will be stored with the entry
 
 The password will be copied to the clipboard (but only for 15 seconds)
 
-### Find and show a password
+Passwords can be organised into folders by just using a name with `/` in it.
+For example, using the name `work/email` will place your email details in the work folder.
 
-`pass.js show`
+#### List all your passwords
+
+`pass` or `pass ls`
+
+#### Find and show a password
+
+`pass show`
 
 Enter the name your gave your password (tab for auto-completion)
 Any key fields will be extracted and shown in a menu. Select the item to copy it to the clipboard.
 ESC to stop selecting fields and quit. The clipboard will be cleared soon afterwards.
 
+You can also use `pass NameOfPassword` or `pass show NameOfPassword` if you know what you're looking for. If NameOfPassword isn't a match, it will be used as a placeholder for the auto-completion, so can help to zoom into what you need.
+
+#### Edit an existing entry
+
+`pass edit` or `pass edit NameOfPassword`
+
+This will open your configured editor to edit the details stored
+
+#### Remove an entry
+
+`pass rm`
+
+#### Generate a random password
+
+`pass generate-password` or just `pass g`
+
+It will not be stored anywhere.
 
 ### Format
 
-When adding notes, or editing records, here are some rules that might help.
+The format used to store passwords is basically the same as in pass, so you can probably also use pass to access and manage your passwords.
+Each password file places the password on the first line. It is assumed that the first line of the file contains the password.
 
-The first line of the file is assumed to be the password.
-After that you are free to use any format you like. However, pass show will look for lines in the following format:-
+All other lines can hold any data you like in any format you like.
+
+If you want to add fields that will appear in the clipboard list though, use the following format for those lines...
 
 ```
 Label: Value
 ```
-
-When offering items to be copied to the clipboard, all these values will also be listed, making it easy to support
-copying the username, password, url or any other things you need into the clipboard.
 
 # Credits
 
