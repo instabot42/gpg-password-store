@@ -1,7 +1,7 @@
 import terminal from 'terminal-kit'
 import { edit } from "external-editor";
-import availableEntries from '../common/available-entries.js'
-import passwordGen from '../common/password-gen.js'
+import availableEntries from './available-entries.js'
+import passwordGen from './password-gen.js'
 
 const term = terminal.terminal
 
