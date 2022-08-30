@@ -121,6 +121,8 @@ export async function listItems(items) {
             submittedLeftPadding: '= '
         }
 
+        term.grabInput({ mouse: 'button' });
+
         term.singleColumnMenu(items, options, function (error, response) {
             term.grabInput(false)
             if (error) {

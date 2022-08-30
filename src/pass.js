@@ -33,6 +33,7 @@ term.on('key', function (name, matches, data) {
     }
 });
 
+
 // Clear the clipboard after a while
 function clipboardProgressBar() {
     if (!hasClipboardBeenChanged()) {
@@ -62,6 +63,12 @@ function clipboardProgressBar() {
     // called every 100ms to update
     function doProgress() {
         progress += timeStep / 15000
+
+        // if we clear the clipboard on some time along the way, we can exit now
+        if (!hasClipboardBeenChanged()) {
+            progress = 2
+        }
+
         progressBar.update(progress)
         if (progress > 1) {
             setTimeout(() => {
