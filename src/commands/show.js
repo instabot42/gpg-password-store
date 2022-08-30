@@ -78,7 +78,7 @@ export default async function showCommand(defaultKey, options) {
         while (keepGoing) {
             // show the list of items to copy to the clipboard
             term.brightGreen('Copy fields to clipboard? (ESC to abort)')
-            const result = await listItems(items.map((i) => `${i.name} => ${i.value}`))
+            const result = await listItems(items.map((i) => i.name.toLowerCase() === 'password' ? `${i.name} => ************` : `${i.name} => ${i.value}`))
 
             // copy it and go around again, or cancel
             if (result?.canceled) {
@@ -91,3 +91,4 @@ export default async function showCommand(defaultKey, options) {
         }
     }
 }
+
