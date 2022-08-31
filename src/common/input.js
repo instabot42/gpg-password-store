@@ -1,11 +1,8 @@
 import terminal from 'terminal-kit'
 import { edit } from "external-editor";
-import availableEntries from './available-entries.js'
 import passwordGen from './password-gen.js'
 
 const term = terminal.terminal
-
-
 
 
 async function inputFieldGeneric(opts) {
@@ -36,7 +33,7 @@ async function inputFieldGeneric(opts) {
 
 export async function createEntry(baseDir) {
     // Find all possible entries
-    const all = availableEntries(baseDir, { files: false, folders: true })
+    const all = []
 
     // function to filter results
     function autoComplete(inputStr) {
@@ -57,9 +54,7 @@ export async function createEntry(baseDir) {
 }
 
 
-export async function findEntry(defaultEntry, baseDir) {
-    // Find all possible entries
-    const all = availableEntries(baseDir)
+export async function findEntry(defaultEntry, all) {
 
     // function to filter results
     function autoComplete(inputStr) {

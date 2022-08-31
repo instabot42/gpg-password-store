@@ -1,7 +1,5 @@
 import gpg from 'gpg'
 
-
-
 export function encrypt(content, id) {
     return new Promise((resolve, reject) => {
         gpg.encrypt(content, [`-r ${id}`, '-a'], (err, msg, stderr) => {
@@ -17,7 +15,7 @@ export function encrypt(content, id) {
 
 export function decrypt(content, id) {
     return new Promise((resolve, reject) => {
-        gpg.decrypt(content, [`-r ${id}`], (err, msg, stderr) => {
+        gpg.decrypt(content, [], (err, msg, stderr) => {
             if (err) {
                 return reject(new Error(err))
             }

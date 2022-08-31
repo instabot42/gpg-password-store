@@ -2,15 +2,12 @@
 import terminal from 'terminal-kit'
 import { Command } from 'commander';
 import { clearClipboardIfNeeded, disableClipboard, hasClipboardBeenChanged } from './common/clip.js'
-import extendOptions from './common/extend-options.js';
 
 import showCommand from './commands/show.js'
 import initCommand from './commands/init.js'
 import editCommand from './commands/edit.js'
 import insertCommand from './commands/insert.js'
 import deleteCommand from './commands/delete.js'
-import defaultCommand from './commands/default.js'
-import backupCommand from './commands/backup.js'
 import generatePasswordCommand from './commands/generate-password.js'
 import listCommand from './commands/list.js'
 
@@ -105,11 +102,6 @@ program
         clipboardProgressBar()
     })
 
-    // Default command is either list or show
-    .argument('[entryName]', 'the name of the entry to lookup', '')
-    .action(async (entryName) => defaultCommand(entryName, extendOptions(program.opts())))
-
-
 // The init command
 program
     .command('init')
@@ -127,7 +119,7 @@ program
     .option('-j, --join-text <jointext>', 'the character (or characters) used between each word', defaultJoinText)
     .option('-r, --random-join', 'use a random special character between each pair of words (overrides -j', defaultRandomJoin)
     .description('Insert a new password into the DB')
-    .action(async (options) => insertCommand(extendOptions({ ...program.opts(), ...options })))
+    .action(async (options) => insertCommand({ ...program.opts(), ...options }))
 
 // The edit command
 program
@@ -135,7 +127,7 @@ program
     .alias('e')
     .argument('[entryName]', 'the name of the entry to lookup', '')
     .description('Edit an existing entry')
-    .action(async (entryName) => editCommand(entryName, extendOptions(program.opts())))
+    .action(async (entryName) => editCommand(entryName, program.opts()))
 
 // The show command
 program
@@ -144,7 +136,7 @@ program
     .alias('get')
     .argument('[entryName]', 'the name of the entry to lookup', '')
     .description('Search for and show password details')
-    .action(async (entryName) => showCommand(entryName, extendOptions(program.opts())))
+    .action(async (entryName) => showCommand(entryName, program.opts()))
 
 // The Delete command
 program
@@ -152,7 +144,7 @@ program
     .alias('rm')
     .argument('[entryName]', 'the name of the entry to lookup', '')
     .description('Delete an item from the store')
-    .action(async (entryName) => deleteCommand(entryName, extendOptions(program.opts())))
+    .action(async (entryName) => deleteCommand(entryName, program.opts()))
 
 // The Generate Password command
 program
@@ -164,7 +156,7 @@ program
     .option('-j, --join-text <jointext>', 'the character (or characters) used between each word', defaultJoinText)
     .option('-r, --random-join', 'use a random special character between each pair of words (overrides -j', defaultRandomJoin)
     .description('Generate a random password, show it and copy it to the clipboard')
-    .action(async (options) => generatePasswordCommand(extendOptions({ ...program.opts(), ...options })))
+    .action(async (options) => generatePasswordCommand({ ...program.opts(), ...options }))
 
 // The List all passwords command
 program
@@ -172,20 +164,7 @@ program
     .alias('ls')
     .alias('l')
     .description('List all the passwords')
-    .action(async () => listCommand(extendOptions(program.opts())))
-
-// The List all passwords command
-program
-    .command('backup')
-    .argument('<folder>', 'the name of the entry to lookup')
-    .description('Backup all content to the target folder')
-    .action(async (folder) => backupCommand(folder, extendOptions(program.opts())))
-
-// The Help command
-program
-    .command('help')
-    .description('Show this help page')
-    .action(async () => program.help())
+    .action(async () => listCommand(program.opts()))
 
 try {
     // go go go...

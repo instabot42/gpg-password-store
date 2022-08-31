@@ -1,54 +1,43 @@
 import terminal from 'terminal-kit'
-import * as utils from '../common/file-utils.js'
 import * as input from '../common/input.js'
+import Database from '../common/db.js'
 
 const term = terminal.terminal
 
-function nameToPath(home, name) {
-    return `${home}${utils.pathSeparator()}${name}.gpg`
-}
 
-export default async function deleteCommand(defaultKey, options) {
-    let askUser = true
-    let fullPath = ''
-    let entryName = defaultKey
-
-    // If we were given a key, see if it is the full key
-    if (defaultKey !== '') {
-        fullPath = nameToPath(options.baseDir, defaultKey)
-        if (utils.fileExists(fullPath)) {
-            askUser = false
-        }
-    }
-
-    // no match yet, so ask the user
-    if (askUser) {
+export default async function deleteCommand(defaultTitle, options) {
+    // See if the title given is a match
+    const db = new Database()
+    let id = await db.titleToId(defaultTitle)
+    let title = defaultTitle
+    if (id === null) {
+        // no match yet, so ask the user
         term.brightRed('Search for item to DELETE (tab for autocomplete):\n')
-        entryName = await input.findEntry(defaultKey, options.baseDir)
 
-        // Build the name from the user input
-        fullPath = nameToPath(options.baseDir, entryName)
+        const all = await db.all()
+        title = await input.findEntry(defaultTitle, all.map(i => i.title))
+        id = await db.titleToId(title)
     }
 
     // After all that, see if we have something valid
-    if (!utils.fileExists(fullPath)) {
-        term.brightRed.error(`${entryName} could not be found.\n`)
+    if (id === null) {
+        term.brightRed.error(`${title} could not be found.\n`)
         return
     }
 
-    term.brightRed(`Type DELETE to confirm you want to delete ${entryName}\n`)
+    term.brightRed(`Type DELETE to confirm you want to delete ${title}\n`)
     const mustBeDelete = await input.text()
     if (mustBeDelete !== 'DELETE') {
         term.brightRed('Cancelled. Item has NOT been deleted.')
         return
     }
 
-    term.brightRed(`OK. Delete ${entryName}. Are you really sure? (y or enter to delete, n to cancel)\n`)
+    term.brightRed(`OK. Delete ${title}. Are you really sure? (y or enter to delete, n to cancel)\n`)
     const confirm = await input.yesNo()
     if (confirm) {
-        term.brightRed(`Going to delete ${entryName}...\n`)
+        term.brightRed(`Going to delete ${title}...\n`)
 
-        utils.deleteFile(fullPath)
+        await db.delete(id)
 
         term.brightRed(`...annnnd, it's gone.\n`)
     }

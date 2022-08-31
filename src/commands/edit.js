@@ -1,28 +1,34 @@
 import terminal from 'terminal-kit'
-import * as utils from '../common/file-utils.js'
-import { encrypt, decrypt } from '../common/encryption.js'
 import { findEntry, editor } from '../common/input.js'
+import Database from '../common/db.js'
 
 const term = terminal.terminal
 
 
 export default async function editCommand(defaultName, options) {
-    term.brightGreen('Find an entry to edit : ')
-    const entryName = await findEntry(defaultName, options.baseDir)
+    // See if the title given is a match
+    const db = new Database()
+    let id = await db.titleToId(defaultName)
+    let title = defaultName
+    if (id === null) {
+        // no match yet, so ask the user
+        term.brightGreen('Search (tab for autocomplete):\n')
 
-    // Find and decrypt the the content
-    let fullPath = `${options.baseDir}${utils.pathSeparator()}${entryName}.gpg`
-    const content = utils.readFile(fullPath)
-    const decrypted = await decrypt(content, options.gpgId)
+        const all = await db.all()
+        title = await findEntry(defaultName, all.map(i => i.title))
+        id = await db.titleToId(title)
+    }
+
+    // fetch the content
+    const content = await db.get(id)
 
     // edit it
-    const updated = await editor(decrypted)
-    if (updated === decrypted) {
+    const updated = await editor(content)
+    if (updated === content) {
         term.brightCyan('No changes made.\n')
     } else {
         // encrypt it and write it back
-        const encrypted = await encrypt(updated, options.gpgId)
-        utils.writeFile(fullPath, encrypted)
-        term.brightCyan(`${entryName} updated\n`)
+        await db.update(id, title, updated)
+        term.brightCyan(`${title} updated\n`)
     }
 }
