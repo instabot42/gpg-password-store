@@ -15,7 +15,6 @@ const term = terminal.terminal
 const program = new Command();
 
 // override defaults from env
-const defaultFolder = process.env.GPG_PASS_DIR || '~/.gpg-store'
 const defaultWordCount = +(process.env.GPG_PASS_WORD_COUNT || 5)
 const defaultMaxWordLen = +(process.env.GPG_PASS_MAX_WORD_LEN || 10)
 const defaultJoinText = process.env.GPG_PASS_JOIN_TEXT || '.'
@@ -88,8 +87,7 @@ function clipboardProgressBar() {
 program
     .name('pass')
     .description('A simple password manager / store that leans on GPG')
-    .version('1.0.0')
-    .option('-d, --dir <folder>', 'Folder to find and store passwords in', defaultFolder)
+    .version('1.5.0')
     .option('-k, --skip-clipboard', "skip the clipboard")
     .hook('preAction', (thisCommand, actionCommand) => {
         const opts = program.opts()
