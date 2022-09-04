@@ -31,20 +31,26 @@ async function inputFieldGeneric(opts) {
     })
 }
 
+function autoCompleteSorted(inputStr, all) {
+    // match any entry that contains the typed text
+    const lowerStr = inputStr.toLowerCase()
+    const matches = all.filter((w) => w.toLowerCase().includes(lowerStr))
+    if (matches.length === 0) {
+        return inputStr
+    }
+
+    return matches.sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
+}
+
+
 export async function createEntry(baseDir) {
     // Find all possible entries
     const all = []
 
-    // function to filter results
     function autoComplete(inputStr) {
-        // match any folder that starts with the typed text
-        const lowerStr = inputStr.toLowerCase()
-        const matches = all.filter((w) => w.toLowerCase().startsWith(lowerStr))
-        if (matches.length === 0) {
-            return inputStr
-        }
-
-        return matches
+        return autoCompleteSorted(inputStr, all)
     }
 
     return inputFieldGeneric({
@@ -55,17 +61,9 @@ export async function createEntry(baseDir) {
 
 
 export async function findEntry(defaultEntry, all) {
-
     // function to filter results
     function autoComplete(inputStr) {
-        // match any entry that contains the typed text
-        const lowerStr = inputStr.toLowerCase()
-        const matches = all.filter((w) => w.toLowerCase().includes(lowerStr))
-        if (matches.length === 0) {
-            return inputStr
-        }
-
-        return matches
+        return autoCompleteSorted(inputStr, all)
     }
 
     return inputFieldGeneric({
