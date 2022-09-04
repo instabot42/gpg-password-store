@@ -2,15 +2,12 @@
 import terminal from 'terminal-kit'
 import { Command } from 'commander';
 import { clearClipboardIfNeeded, disableClipboard, hasClipboardBeenChanged } from './common/clip.js'
-import extendOptions from './common/extend-options.js';
 
 import showCommand from './commands/show.js'
 import initCommand from './commands/init.js'
 import editCommand from './commands/edit.js'
 import insertCommand from './commands/insert.js'
 import deleteCommand from './commands/delete.js'
-import defaultCommand from './commands/default.js'
-import backupCommand from './commands/backup.js'
 import generatePasswordCommand from './commands/generate-password.js'
 import listCommand from './commands/list.js'
 
@@ -18,7 +15,6 @@ const term = terminal.terminal
 const program = new Command();
 
 // override defaults from env
-const defaultFolder = process.env.GPG_PASS_DIR || '~/.gpg-store'
 const defaultWordCount = +(process.env.GPG_PASS_WORD_COUNT || 5)
 const defaultMaxWordLen = +(process.env.GPG_PASS_MAX_WORD_LEN || 10)
 const defaultJoinText = process.env.GPG_PASS_JOIN_TEXT || '.'
@@ -32,6 +28,7 @@ term.on('key', function (name, matches, data) {
         setTimeout(function () { process.exit() }, 100);
     }
 });
+
 
 // Clear the clipboard after a while
 function clipboardProgressBar() {
@@ -62,6 +59,12 @@ function clipboardProgressBar() {
     // called every 100ms to update
     function doProgress() {
         progress += timeStep / 15000
+
+        // if we clear the clipboard on some time along the way, we can exit now
+        if (!hasClipboardBeenChanged()) {
+            progress = 2
+        }
+
         progressBar.update(progress)
         if (progress > 1) {
             setTimeout(() => {
@@ -84,8 +87,7 @@ function clipboardProgressBar() {
 program
     .name('pass')
     .description('A simple password manager / store that leans on GPG')
-    .version('1.0.0')
-    .option('-d, --dir <folder>', 'Folder to find and store passwords in', defaultFolder)
+    .version('1.5.0')
     .option('-k, --skip-clipboard', "skip the clipboard")
     .hook('preAction', (thisCommand, actionCommand) => {
         const opts = program.opts()
@@ -97,11 +99,6 @@ program
         const opts = program.opts()
         clipboardProgressBar()
     })
-
-    // Default command is either list or show
-    .argument('[entryName]', 'the name of the entry to lookup', '')
-    .action(async (entryName) => defaultCommand(entryName, extendOptions(program.opts())))
-
 
 // The init command
 program
@@ -120,7 +117,7 @@ program
     .option('-j, --join-text <jointext>', 'the character (or characters) used between each word', defaultJoinText)
     .option('-r, --random-join', 'use a random special character between each pair of words (overrides -j', defaultRandomJoin)
     .description('Insert a new password into the DB')
-    .action(async (options) => insertCommand(extendOptions({ ...program.opts(), ...options })))
+    .action(async (options) => insertCommand({ ...program.opts(), ...options }))
 
 // The edit command
 program
@@ -128,7 +125,7 @@ program
     .alias('e')
     .argument('[entryName]', 'the name of the entry to lookup', '')
     .description('Edit an existing entry')
-    .action(async (entryName) => editCommand(entryName, extendOptions(program.opts())))
+    .action(async (entryName) => editCommand(entryName, program.opts()))
 
 // The show command
 program
@@ -137,7 +134,7 @@ program
     .alias('get')
     .argument('[entryName]', 'the name of the entry to lookup', '')
     .description('Search for and show password details')
-    .action(async (entryName) => showCommand(entryName, extendOptions(program.opts())))
+    .action(async (entryName) => showCommand(entryName, program.opts()))
 
 // The Delete command
 program
@@ -145,7 +142,7 @@ program
     .alias('rm')
     .argument('[entryName]', 'the name of the entry to lookup', '')
     .description('Delete an item from the store')
-    .action(async (entryName) => deleteCommand(entryName, extendOptions(program.opts())))
+    .action(async (entryName) => deleteCommand(entryName, program.opts()))
 
 // The Generate Password command
 program
@@ -157,7 +154,7 @@ program
     .option('-j, --join-text <jointext>', 'the character (or characters) used between each word', defaultJoinText)
     .option('-r, --random-join', 'use a random special character between each pair of words (overrides -j', defaultRandomJoin)
     .description('Generate a random password, show it and copy it to the clipboard')
-    .action(async (options) => generatePasswordCommand(extendOptions({ ...program.opts(), ...options })))
+    .action(async (options) => generatePasswordCommand({ ...program.opts(), ...options }))
 
 // The List all passwords command
 program
@@ -165,20 +162,7 @@ program
     .alias('ls')
     .alias('l')
     .description('List all the passwords')
-    .action(async () => listCommand(extendOptions(program.opts())))
-
-// The List all passwords command
-program
-    .command('backup')
-    .argument('<folder>', 'the name of the entry to lookup')
-    .description('Backup all content to the target folder')
-    .action(async (folder) => backupCommand(folder, extendOptions(program.opts())))
-
-// The Help command
-program
-    .command('help')
-    .description('Show this help page')
-    .action(async () => program.help())
+    .action(async () => listCommand(program.opts()))
 
 try {
     // go go go...

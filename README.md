@@ -19,6 +19,18 @@ Note, I built this just for fun - it's not audited and it's not my job to mainta
 
 Don't forget to backup your GPG key pairs. Without them you won't be able to every recover your passwords.
 
+
+### What different vs pass
+
+The cli behaves a little differently - enough to be not a drop in replacement. This project uses more interactive features that gets input from the user (for example, when looking up a password we have auto-completion and don't expect the full name of the password to be entered on the command line)
+
+pass stores each of your passwords in a separate file. The filename of the file is the name of the password. For example, if you store a password for `amazon.com`, it would be in a file called `amazon.com.gpg`. This is undesiable, as it reveals which password is which and also which sites and services you use. This is assuming you back up your password data somewhere that someone else could see (eg git, dropbox, google drive etc).
+
+This implemenation works a little different. First, each file uses a UUID as the filename. Second, we have added a database file to the folder that contains a mapping from password name to the UUID used. This database file is also encrypted using your GPG keys, so the sites you use is hidden and it is harder to target a specific gpg file for a high value account.
+
+The format of the decrypted password file is the same though (first line has the password in it, rest of the file using any format you like, but encourages the format of `Label: value` for additional fields).
+
+
 ## Setup
 
 ### Install GPG
@@ -47,11 +59,11 @@ You don't need to set anything up here to use gpg-password-store, but you can ov
 * GPG_PASS_MAX_WORD_LEN - Max length of each of the words used (default 10)
 * GPG_PASS_JOIN_TEXT - the text used between each word. Set this to 'true' and a random special char will be used each time (default '.')
 
-Also, set up an alias, such as `alias pass="node ~/path/to/repo/src/pass.js"`, so you can call it from anywhere with just `pass`
+Also, set up an alias or similar, such as `alias pass="node ~/path/to/repo/src/pass.js"`, so you can call it from anywhere with just `pass`
 
 ### Windows Setup
 
-¯\_ (ツ)_/¯
+`¯\_ (ツ)_/¯`
 
 
 ## Usage
@@ -111,19 +123,6 @@ This will open your configured editor to edit the details stored
 
 It will not be stored anywhere.
 
-#### Backup
-
-`pass backup <targetFolder>`
-
-This will collect up all the encrypted files in your password store, bundle them up into a single file, encrypt that and write a date stamped file into the backup folder given.
-Note that none of your encrypted files are decrypted in this process, and all your files are left exactly as they were. You gain a single encrypted file somewhere else that you can save to some off-site storage (external drive, cloud backup etc). As the bundle is encrypted, the file names and folders used in your password store are not revealed.
-
-Note also that there isn't a restore process yet...
-You can decrypt the backup file using the same keypair used by the password store. It is a json file using the following format...
-
-```
-[ { name: 'password name', content: 'encrypted file content' }, ... ]
-```
 
 ### Format
 

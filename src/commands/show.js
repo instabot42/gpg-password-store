@@ -1,8 +1,7 @@
 import terminal from 'terminal-kit'
-import * as utils from '../common/file-utils.js'
 import { copyToClipboard } from '../common/clip.js'
-import { decrypt } from '../common/encryption.js'
 import { findEntry, listItems } from '../common/input.js'
+import Database from '../common/db.js'
 
 const term = terminal.terminal
 
@@ -27,43 +26,25 @@ function extractItems(content) {
     return items
 }
 
-function nameToPath(home, name) {
-    return `${home}${utils.pathSeparator()}${name}.gpg`
-}
-
-export default async function showCommand(defaultKey, options) {
-    let askUser = true
-    let fullPath = ''
-
-    // If we were given a key, see if it is the full key
-    if (defaultKey !== '') {
-        fullPath = nameToPath(options.baseDir, defaultKey)
-        if (utils.fileExists(fullPath)) {
-            askUser = false
-        }
-    }
-
-    // no match yet, so ask the user
-    if (askUser) {
+export default async function showCommand(defaultTitle, options) {
+    // See if the title given is a match
+    const db = new Database()
+    let id = await db.titleToId(defaultTitle)
+    let title = defaultTitle
+    if (id === null) {
+        // no match yet, so ask the user
         term.brightGreen('Search (tab for autocomplete):\n')
-        const entryName = await findEntry(defaultKey, options.baseDir)
 
-        // Build the name from the user input
-        fullPath = nameToPath(options.baseDir, entryName)
+        const all = await db.all()
+        title = await findEntry(defaultTitle, all.map(i => i.title))
+        id = await db.titleToId(title)
     }
 
-    // After all that, see if we have something valid
-    if (!utils.fileExists(fullPath)) {
-        term.brightRed.error(`${entryName} could not be found.\n`)
-        return
-    }
-
-    // decrypt and enjoy
-    const content = utils.readFile(fullPath)
-    const decrypted = await decrypt(content, options.gpgId)
+    // fetch the content
+    const content = await db.get(id)
 
     // Show it
-    term.brightWhite(decrypted)
+    term.brightWhite(content)
     term('\n')
 
     // skip the clipboard?
@@ -72,13 +53,13 @@ export default async function showCommand(defaultKey, options) {
     }
 
     // pick stuff for clipping
-    const items = extractItems(decrypted)
+    const items = extractItems(content)
     if (items.length > 0) {
         let keepGoing = true
         while (keepGoing) {
             // show the list of items to copy to the clipboard
             term.brightGreen('Copy fields to clipboard? (ESC to abort)')
-            const result = await listItems(items.map((i) => `${i.name} => ${i.value}`))
+            const result = await listItems(items.map((i) => i.name.toLowerCase() === 'password' ? `${i.name} => ************` : `${i.name} => ${i.value}`))
 
             // copy it and go around again, or cancel
             if (result?.canceled) {
@@ -91,3 +72,4 @@ export default async function showCommand(defaultKey, options) {
         }
     }
 }
+

@@ -2,7 +2,22 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs'
 
-export function resolvePath(filePath) {
+let baseDir = ''
+
+export function setBaseFolder(folder) {
+    baseDir = resolvePath(folder)
+    if (!baseDir.endsWith(path.sep)) {
+        baseDir += path.sep
+    }
+}
+
+setBaseFolder(process.env.GPG_PASS_DIR || '~/.gpg-store')
+
+export function getBaseFolder() {
+    return baseDir
+}
+
+function resolvePath(filePath) {
     if (!filePath || typeof (filePath) !== 'string') {
         return ''
     }
@@ -15,23 +30,10 @@ export function resolvePath(filePath) {
     return path.resolve(filePath)
 }
 
-export function isFilenameAvailable(filePath) {
-    try {
-        const fileStat = fs.lstatSync(filePath);
-        return false
-    } catch (err) {
-        if (err.code !== 'ENOENT') {
-            // Something else went wrong, so treat as the file is not available
-            return false
-        }
-    }
 
-    return true
-}
-
-export function fileExists(filePath) {
+export function fileExists(filename) {
     try {
-        fs.readFileSync(filePath)
+        fs.readFileSync(`${baseDir}${filename}`)
         return true
     } catch (err) {
         // does not exist, or some of ther error (permission)
@@ -40,28 +42,19 @@ export function fileExists(filePath) {
     return false
 }
 
-export function deleteFile(filePath) {
+export function deleteFile(filename) {
     try {
-        fs.unlinkSync(filePath)
+        fs.unlinkSync(`${baseDir}${filename}`)
         return true
     } catch (err) {
         return false
     }
 }
 
-export function createDeepFolder(folder) {
+export function createBaseFolder() {
     try {
-        fs.mkdirSync(folder, { recursive: true })
+        fs.mkdirSync(baseDir, { recursive: true })
         return true
-    } catch (err) {
-        return false
-    }
-}
-
-export function createFileFolder(filePath) {
-    try {
-        const folder = path.dirname(filePath)
-        return createDeepFolder(folder)
     } catch (err) {
         return false
     }
@@ -71,10 +64,30 @@ export function pathSeparator() {
     return path.sep
 }
 
-export function writeFile(fullpath, content) {
-    return fs.writeFileSync(fullpath, content)
+export function writeFile(filename, content) {
+    return fs.writeFileSync(`${baseDir}${filename}`, content)
 }
 
-export function readFile(fullpath, content) {
-    return fs.readFileSync(fullpath).toString()
+export function readFile(filename) {
+    return fs.readFileSync(`${baseDir}${filename}`).toString()
+}
+
+export function writeWithBackup(filename, content) {
+    if (!fileExists(filename)) {
+        // if the file does not exist yet, just do a normal write operation
+        return writeFile(filename, content)
+    }
+
+    const backupName = filename + '.bak'
+
+    // remove the existing backup file (if it exists)
+    if (fileExists(backupName)) {
+        fs.unlinkSync(`${baseDir}${backupName}`)
+    }
+
+    // move the existing file to the backup file
+    fs.renameSync(`${baseDir}${filename}`, `${baseDir}${backupName}`)
+
+    // write the new file
+    return writeFile(filename, content)
 }

@@ -1,11 +1,8 @@
 import terminal from 'terminal-kit'
 import { edit } from "external-editor";
-import availableEntries from './available-entries.js'
 import passwordGen from './password-gen.js'
 
 const term = terminal.terminal
-
-
 
 
 async function inputFieldGeneric(opts) {
@@ -34,20 +31,26 @@ async function inputFieldGeneric(opts) {
     })
 }
 
+function autoCompleteSorted(inputStr, all) {
+    // match any entry that contains the typed text
+    const lowerStr = inputStr.toLowerCase()
+    const matches = all.filter((w) => w.toLowerCase().includes(lowerStr))
+    if (matches.length === 0) {
+        return inputStr
+    }
+
+    return matches.sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
+}
+
+
 export async function createEntry(baseDir) {
     // Find all possible entries
-    const all = availableEntries(baseDir, { files: false, folders: true })
+    const all = []
 
-    // function to filter results
     function autoComplete(inputStr) {
-        // match any folder that starts with the typed text
-        const lowerStr = inputStr.toLowerCase()
-        const matches = all.filter((w) => w.toLowerCase().startsWith(lowerStr))
-        if (matches.length === 0) {
-            return inputStr
-        }
-
-        return matches
+        return autoCompleteSorted(inputStr, all)
     }
 
     return inputFieldGeneric({
@@ -57,20 +60,10 @@ export async function createEntry(baseDir) {
 }
 
 
-export async function findEntry(defaultEntry, baseDir) {
-    // Find all possible entries
-    const all = availableEntries(baseDir)
-
+export async function findEntry(defaultEntry, all) {
     // function to filter results
     function autoComplete(inputStr) {
-        // match any entry that contains the typed text
-        const lowerStr = inputStr.toLowerCase()
-        const matches = all.filter((w) => w.toLowerCase().includes(lowerStr))
-        if (matches.length === 0) {
-            return inputStr
-        }
-
-        return matches
+        return autoCompleteSorted(inputStr, all)
     }
 
     return inputFieldGeneric({
@@ -120,6 +113,8 @@ export async function listItems(items) {
             selectedLeftPadding: '> ',
             submittedLeftPadding: '= '
         }
+
+        term.grabInput({ mouse: 'button' });
 
         term.singleColumnMenu(items, options, function (error, response) {
             term.grabInput(false)

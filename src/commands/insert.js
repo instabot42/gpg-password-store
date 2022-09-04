@@ -1,37 +1,16 @@
 import terminal from 'terminal-kit'
-import * as utils from '../common/file-utils.js'
 import { copyToClipboard } from '../common/clip.js'
-import { encrypt } from '../common/encryption.js'
 import * as input from '../common/input.js'
+import Database from '../common/db.js'
 
 const term = terminal.terminal
 
 
-function toValidPath(entryName, baseDir) {
-    if (entryName.length === 0) {
-        throw new Error('No name given')
-    }
-
-    // base name (to check for overlapping folders)
-    let fullPath = `${baseDir}${utils.pathSeparator()}${entryName}`
-    if (!utils.isFilenameAvailable(fullPath)) {
-        throw new Error('Entry already in use')
-    }
-
-    // add an extension and recheck
-    fullPath += '.gpg'
-    if (!utils.isFilenameAvailable(fullPath)) {
-        throw new Error('Entry already in use')
-    }
-
-    return fullPath
-}
-
-
 export default async function insertCommand(options) {
+    const db = new Database()
+
     term.brightGreen('Name of new entry: ')
     const entryName = await input.createEntry(options.baseDir)
-    const validPath = toValidPath(entryName, options.baseDir)
 
     // ask for a password, or generate one
     term.brightGreen('\nPassword (tab to generate one): ')
@@ -43,26 +22,17 @@ export default async function insertCommand(options) {
     // Ask about extra notes
     term.brightGreen('\nDo you want to add notes (y or Enter), or skip (n, Esc)\n')
     const wantNotes = await input.yesNo()
-    let notes = ''
-    if (wantNotes) {
-        notes = await input.editor('Additional Notes\n\n')
-    }
+    const notes = wantNotes ? await input.editor('') : ''
 
     // combine all responses into a single doc
-    let fullEntry = `${password}\n`
-    if (username != '') { fullEntry += `\nUsername: ${username}\n` }
-    if (notes !== '') { fullEntry += `${notes}\n` }
+    let fullEntry = `${password}\n${entryName}\n\n`
+    if (username != '') { fullEntry += `Username: ${username}\n` }
+    if (notes !== '') { fullEntry += `\n${notes}` }
     term.brightCyan(fullEntry)
 
     // encrypt it
-    const encrypted = await encrypt(fullEntry, options.gpgId)
-
-    // create the folders
-    utils.createFileFolder(validPath)
-
-    // write the encrypted data to the file
-    utils.writeFile(validPath, encrypted)
-    term.dim.white('Encrypted and saved\n')
+    db.create(entryName, fullEntry)
+    term.dim.white('\nEncrypted and saved\n')
 
     // clipboard
     term.brightCyan(`Password copied to clipboard\n`)
