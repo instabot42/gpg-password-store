@@ -22,20 +22,17 @@ export default async function insertCommand(options) {
     // Ask about extra notes
     term.brightGreen('\nDo you want to add notes (y or Enter), or skip (n, Esc)\n')
     const wantNotes = await input.yesNo()
-    let notes = ''
-    if (wantNotes) {
-        notes = await input.editor('Additional Notes\n\n')
-    }
+    const notes = wantNotes ? await input.editor('') : ''
 
     // combine all responses into a single doc
-    let fullEntry = `${password}\n`
-    if (username != '') { fullEntry += `\nUsername: ${username}\n` }
-    if (notes !== '') { fullEntry += `${notes}\n` }
+    let fullEntry = `${password}\n${entryName}\n\n`
+    if (username != '') { fullEntry += `Username: ${username}\n` }
+    if (notes !== '') { fullEntry += `\n${notes}` }
     term.brightCyan(fullEntry)
 
     // encrypt it
     db.create(entryName, fullEntry)
-    term.dim.white('Encrypted and saved\n')
+    term.dim.white('\nEncrypted and saved\n')
 
     // clipboard
     term.brightCyan(`Password copied to clipboard\n`)
