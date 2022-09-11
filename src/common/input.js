@@ -106,10 +106,10 @@ export async function listItems(items) {
     return new Promise((resolve, reject) => {
         const options = {
             style: term.white,
-            selectedStyle: term.brightYellow,
+            selectedStyle: term.brightCyan,
             oneLineItem: true,
             cancelable: true,
-            leftPadding: '- ',
+            leftPadding: '  ',
             selectedLeftPadding: '> ',
             submittedLeftPadding: '= '
         }
