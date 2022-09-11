@@ -28,11 +28,12 @@ export default async function insertCommand(options) {
     let fullEntry = `${password}\n${entryName}\n\n`
     if (username != '') { fullEntry += `Username: ${username}\n` }
     if (notes !== '') { fullEntry += `\n${notes}` }
-    term.brightCyan(fullEntry)
 
     // encrypt it
-    db.create(entryName, fullEntry)
-    term.dim.white('\nEncrypted and saved\n')
+    term.dim.white('\nWriting...\n')
+    await db.create(entryName, fullEntry)
+    term.dim.white('Encrypted and saved\n\n')
+    term.brightCyan(fullEntry)
 
     // clipboard
     term.brightCyan(`Password copied to clipboard\n`)
