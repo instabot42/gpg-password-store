@@ -40,6 +40,11 @@ export default async function showCommand(defaultTitle, options) {
         id = await db.titleToId(title)
     }
 
+    // Check we got one
+    if (id === null) {
+        throw new Error(`No entry found with the title of '${title}'`)
+    }
+
     // fetch the content
     const content = await db.get(id)
 
@@ -59,7 +64,7 @@ export default async function showCommand(defaultTitle, options) {
         while (keepGoing) {
             // show the list of items to copy to the clipboard
             term.brightGreen('Copy fields to clipboard? (ESC to abort)')
-            const result = await listItems(items.map((i) => i.name.toLowerCase() === 'password' ? `${i.name} => ************` : `${i.name} => ${i.value}`))
+            const result = await listItems(items.map((i) => i.name.toLowerCase().includes('password') ? `${i.name} => ************` : `${i.name} => ${i.value}`))
 
             // copy it and go around again, or cancel
             if (result?.canceled) {
