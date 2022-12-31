@@ -33,14 +33,26 @@ async function inputFieldGeneric(opts) {
 function autoCompleteSorted(inputStr, all) {
     // match any entry that contains the typed text
     const lowerStr = inputStr.toLowerCase()
-    const matches = all.filter((w) => w.toLowerCase().includes(lowerStr))
+    const matches = all.filter((w) => w.title.toLowerCase().includes(lowerStr))
     if (matches.length === 0) {
         return inputStr
     }
 
-    return matches.sort(function (a, b) {
-        return a.toLowerCase().localeCompare(b.toLowerCase())
-    })
+    return matches
+        .sort((a, b) => {
+            // sort by access time
+            const at = a.accessedAt ?? 0
+            const bt = b.accessedAt ?? 0
+            if (at === bt) {
+                // fall back to title
+                const al = a.title.toLowerCase()
+                const bl = b.title.toLowerCase()
+                return al < bl ? -1 : +(al > bl)
+            }
+
+            return bt - at
+        })
+        .map((e) => e.title)
 }
 
 export async function createEntry(baseDir) {

@@ -14,10 +14,7 @@ export default async function deleteCommand(defaultTitle, options) {
         term.brightRed('Search for item to DELETE (tab for autocomplete):\n')
 
         const all = await db.all()
-        title = await input.findEntry(
-            defaultTitle,
-            all.map((i) => i.title)
-        )
+        title = await input.findEntry(defaultTitle, all)
         id = await db.titleToId(title)
     }
 

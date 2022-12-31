@@ -11,7 +11,6 @@ export default class Database {
         const gpgIdFileContents = utils.readFile('.gpgid')
         const ids = gpgIdFileContents.split(',')
         this.gpgIds = ids.map((v) => v.replace(/\s+/g, '')).filter((v) => v !== '')
-        console.log(this.gpgIds)
 
         // create a default empty db
         this.db = {
@@ -142,7 +141,8 @@ export default class Database {
         utils.writeFile(id, encrypted)
 
         // insert entry into db
-        this.db.passwords.push({ id, title })
+        const now = Date.now()
+        this.db.passwords.push({ id, title, createdAt: now, accessedAt: now, modifiedAt: now })
 
         // save db
         await this.save()
@@ -168,6 +168,10 @@ export default class Database {
         if (!utils.fileExists(id)) {
             throw new Error(`No content file for id ${id}`)
         }
+
+        // update access times
+        this.db.passwords[i].accessedAt = Date.now()
+        await this.save()
 
         // get the contents of id (decrypted)
         const encrypted = utils.readFile(id)
@@ -203,6 +207,7 @@ export default class Database {
 
         // update the db
         this.db.passwords[i].title = title
+        this.db.passwords[i].modifiedAt = Date.now()
 
         // save db
         await this.save()

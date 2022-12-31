@@ -14,10 +14,7 @@ export default async function editCommand(defaultName, options) {
         term.brightGreen('Search (tab for autocomplete):\n')
 
         const all = await db.all()
-        title = await findEntry(
-            defaultName,
-            all.map((i) => i.title)
-        )
+        title = await findEntry(defaultName, all)
         id = await db.titleToId(title)
     }
 

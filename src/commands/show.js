@@ -35,10 +35,7 @@ export default async function showCommand(defaultTitle, options) {
         term.brightGreen('Search (tab for autocomplete):\n')
 
         const all = await db.all()
-        title = await findEntry(
-            defaultTitle,
-            all.map((i) => i.title)
-        )
+        title = await findEntry(defaultTitle, all)
         id = await db.titleToId(title)
     }
 
