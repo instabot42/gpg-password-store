@@ -62,6 +62,7 @@ export default async function showCommand(defaultTitle, options) {
     const items = extractItems(content)
     if (items.length > 0) {
         let keepGoing = true
+        let selectedIndex = 0
         while (keepGoing) {
             // show the list of items to copy to the clipboard
             term.brightGreen('Copy fields to clipboard? (ESC to abort)')
@@ -70,7 +71,8 @@ export default async function showCommand(defaultTitle, options) {
                     i.name.toLowerCase().includes('password')
                         ? `${i.name} => ************`
                         : `${i.name} => ${i.value}`
-                )
+                ),
+                selectedIndex
             )
 
             // copy it and go around again, or cancel
@@ -80,6 +82,10 @@ export default async function showCommand(defaultTitle, options) {
                 const value = items[result.selectedIndex].value
                 copyToClipboard(value)
                 term.brightCyan(`\n>>'${items[result.selectedIndex].name}' copied<<\n\n`)
+
+                // default to the next entry
+                selectedIndex =
+                    result.selectedIndex >= items.length - 1 ? 0 : result.selectedIndex + 1
             }
         }
     }

@@ -111,7 +111,7 @@ export async function editor(content) {
     return edit(content)
 }
 
-export async function listItems(items) {
+export async function listItems(items, selectedIndex = 0) {
     return new Promise((resolve, reject) => {
         const options = {
             style: term.white,
@@ -121,6 +121,7 @@ export async function listItems(items) {
             leftPadding: '  ',
             selectedLeftPadding: '> ',
             submittedLeftPadding: '= ',
+            selectedIndex,
         }
 
         term.grabInput({ mouse: 'button' })
