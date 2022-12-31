@@ -9,9 +9,9 @@ export default class Database {
     constructor() {
         // Get a cleaned gpg key name
         const gpgIdFileContents = utils.readFile('.gpgid')
-        const regex = /\s+|,/g
-        const ids = gpgIdFileContents.split(regex)
-        this.gpgIds = ids.filter((v) => v !== '')
+        const ids = gpgIdFileContents.split(',')
+        this.gpgIds = ids.map((v) => v.replace(/\s+/g, '')).filter((v) => v !== '')
+        console.log(this.gpgIds)
 
         // create a default empty db
         this.db = {
