@@ -104,8 +104,13 @@ program
 // The init command
 program
     .command('init')
-    .argument('<gpgKeyPair>', 'name of the GPG keypair that will be used for encryption/decryption')
-    .description('Create the target folder that will be used to store everything')
+    .argument(
+        '<gpgKeyPairId,gpgKeyPairId>',
+        'name / ID of the GPG keypairs that will be used for encryption/decryption.'
+    )
+    .description(
+        'Create the target folder that will be used to store everything. To encrypt to many key pairs, comma separate them'
+    )
     .action(async (gpgKeyPair) => initCommand(gpgKeyPair, program.opts()))
 
 // The insert command
@@ -151,8 +156,9 @@ program
     .alias('s')
     .alias('g')
     .argument('[entryName]', 'the name of the entry to lookup', '')
+    .option('-s, --show-all', 'Output the whole entry to the terminal', false)
     .description('Search for and show password details')
-    .action(async (entryName) => showCommand(entryName, program.opts()))
+    .action(async (entryName, options) => showCommand(entryName, { ...program.opts(), ...options }))
 
 // The Delete command
 program

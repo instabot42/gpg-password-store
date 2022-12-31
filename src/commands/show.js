@@ -51,8 +51,10 @@ export default async function showCommand(defaultTitle, options) {
     const content = await db.get(id)
 
     // Show it
-    term.brightWhite(content)
-    term('\n')
+    if (options.showAll) {
+        term.brightWhite(content)
+        term('\n')
+    }
 
     // skip the clipboard?
     if (options.skipClipboard) {
