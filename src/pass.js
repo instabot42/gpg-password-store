@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import terminal from 'terminal-kit'
-import { Command } from 'commander';
+import { Command } from 'commander'
 import { clearClipboardIfNeeded, disableClipboard, hasClipboardBeenChanged } from './common/clip.js'
 
 import showCommand from './commands/show.js'
@@ -12,7 +12,7 @@ import generatePasswordCommand from './commands/generate-password.js'
 import listCommand from './commands/list.js'
 
 const term = terminal.terminal
-const program = new Command();
+const program = new Command()
 
 // override defaults from env
 const defaultWordCount = +(process.env.GPG_PASS_WORD_COUNT || 5)
@@ -24,11 +24,12 @@ const defaultRandomJoin = defaultJoinText.toLowerCase() === 'true'
 term.on('key', function (name, matches, data) {
     if (name === 'CTRL_C') {
         term.red('\nTerminating by ctrl-c (clipboard may not be cleared)\n')
-        term.grabInput(false);
-        setTimeout(function () { process.exit() }, 100);
+        term.grabInput(false)
+        setTimeout(function () {
+            process.exit()
+        }, 100)
     }
-});
-
+})
 
 // Clear the clipboard after a while
 function clipboardProgressBar() {
@@ -53,8 +54,8 @@ function clipboardProgressBar() {
         width: 80,
         title: 'Clearing clipboard in...',
         eta: true,
-        percent: true
-    });
+        percent: true,
+    })
 
     // called every 100ms to update
     function doProgress() {
@@ -87,8 +88,8 @@ function clipboardProgressBar() {
 program
     .name('pass')
     .description('A simple password manager / store that leans on GPG')
-    .version('1.5.0')
-    .option('-k, --skip-clipboard', "skip the clipboard")
+    .version('1.6.1')
+    .option('-k, --skip-clipboard', 'skip the clipboard')
     .hook('preAction', (thisCommand, actionCommand) => {
         const opts = program.opts()
         if (opts.skipClipboard) {
@@ -112,10 +113,26 @@ program
     .command('insert')
     .alias('i')
     .alias('add')
-    .option('-w, --word-count <wordcount>', 'how many words should the password contain', defaultWordCount)
-    .option('-m, --max-word-len <maxlen>', 'the maximum length of each word used (can be shorted, but no longer)', defaultMaxWordLen)
-    .option('-j, --join-text <jointext>', 'the character (or characters) used between each word', defaultJoinText)
-    .option('-r, --random-join', 'use a random special character between each pair of words (overrides -j', defaultRandomJoin)
+    .option(
+        '-w, --word-count <wordcount>',
+        'how many words should the password contain',
+        defaultWordCount
+    )
+    .option(
+        '-m, --max-word-len <maxlen>',
+        'the maximum length of each word used (can be shorted, but no longer)',
+        defaultMaxWordLen
+    )
+    .option(
+        '-j, --join-text <jointext>',
+        'the character (or characters) used between each word',
+        defaultJoinText
+    )
+    .option(
+        '-r, --random-join',
+        'use a random special character between each pair of words (overrides -j',
+        defaultRandomJoin
+    )
     .description('Insert a new password into the DB')
     .action(async (options) => insertCommand({ ...program.opts(), ...options }))
 
@@ -129,9 +146,10 @@ program
 
 // The show command
 program
-    .command('show')
+    .command('get', { isDefault: true })
+    .alias('show')
     .alias('s')
-    .alias('get')
+    .alias('g')
     .argument('[entryName]', 'the name of the entry to lookup', '')
     .description('Search for and show password details')
     .action(async (entryName) => showCommand(entryName, program.opts()))
@@ -149,10 +167,26 @@ program
     .command('generate-password')
     .alias('g')
     .alias('gen')
-    .option('-w, --word-count <wordcount>', 'how many words should the password contain', defaultWordCount)
-    .option('-m, --max-word-len <maxlen>', 'the maximum length of each word used (can be shorted, but no longer)', defaultMaxWordLen)
-    .option('-j, --join-text <jointext>', 'the character (or characters) used between each word', defaultJoinText)
-    .option('-r, --random-join', 'use a random special character between each pair of words (overrides -j', defaultRandomJoin)
+    .option(
+        '-w, --word-count <wordcount>',
+        'how many words should the password contain',
+        defaultWordCount
+    )
+    .option(
+        '-m, --max-word-len <maxlen>',
+        'the maximum length of each word used (can be shorted, but no longer)',
+        defaultMaxWordLen
+    )
+    .option(
+        '-j, --join-text <jointext>',
+        'the character (or characters) used between each word',
+        defaultJoinText
+    )
+    .option(
+        '-r, --random-join',
+        'use a random special character between each pair of words (overrides -j',
+        defaultRandomJoin
+    )
     .description('Generate a random password, show it and copy it to the clipboard')
     .action(async (options) => generatePasswordCommand({ ...program.opts(), ...options }))
 

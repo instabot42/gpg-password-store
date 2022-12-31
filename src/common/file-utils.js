@@ -1,5 +1,5 @@
-import path from 'path';
-import os from 'os';
+import path from 'path'
+import os from 'os'
 import fs from 'fs'
 
 let baseDir = ''
@@ -18,7 +18,7 @@ export function getBaseFolder() {
 }
 
 function resolvePath(filePath) {
-    if (!filePath || typeof (filePath) !== 'string') {
+    if (!filePath || typeof filePath !== 'string') {
         return ''
     }
 
@@ -29,7 +29,6 @@ function resolvePath(filePath) {
 
     return path.resolve(filePath)
 }
-
 
 export function fileExists(filename) {
     try {

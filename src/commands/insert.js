@@ -5,7 +5,6 @@ import Database from '../common/db.js'
 
 const term = terminal.terminal
 
-
 export default async function insertCommand(options) {
     const db = new Database()
 
@@ -14,7 +13,11 @@ export default async function insertCommand(options) {
 
     // ask for a password, or generate one
     term.brightGreen('\nPassword (tab to generate one): ')
-    const password = await input.password(options.wordCount, options.maxWordLen, options.randomJoin ? true : options.joinText)
+    const password = await input.password(
+        options.wordCount,
+        options.maxWordLen,
+        options.randomJoin ? true : options.joinText
+    )
 
     term.brightGreen('Username: ')
     const username = await input.username()
@@ -26,8 +29,12 @@ export default async function insertCommand(options) {
 
     // combine all responses into a single doc
     let fullEntry = `${password}\n${entryName}\n\n`
-    if (username != '') { fullEntry += `Username: ${username}\n` }
-    if (notes !== '') { fullEntry += `\n${notes}` }
+    if (username != '') {
+        fullEntry += `Username: ${username}\n`
+    }
+    if (notes !== '') {
+        fullEntry += `\n${notes}`
+    }
 
     // encrypt it
     term.dim.white('\nWriting...\n')

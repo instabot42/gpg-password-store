@@ -5,10 +5,13 @@ import { passwordColoured } from '../common/password-highlight.js'
 
 const term = terminal.terminal
 
-
 export default async function generatePasswordCommand(options) {
     // Make a new password, copy it to the clipboard and log it out
-    const password = passwordGen(options.wordCount, options.maxWordLen, options.randomJoin ? true : options.joinText)
+    const password = passwordGen(
+        options.wordCount,
+        options.maxWordLen,
+        options.randomJoin ? true : options.joinText
+    )
 
     // show it
     passwordColoured(password)

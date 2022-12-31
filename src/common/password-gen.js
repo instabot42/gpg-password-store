@@ -10,7 +10,7 @@ function randInt() {
 
 /**
  * Random int in the range 0 to len-1
- * @param {*} len 
+ * @param {*} len
  */
 function randLen(len) {
     return randInt() % len
@@ -20,7 +20,7 @@ function randLen(len) {
  * Generate a random "join" string to use between words
  */
 function randomJoin() {
-    const special = ".,!@#$%^&*()_-+=;:|"
+    const special = '.,!@#$%^&*()_-+=;:|'
     const rndNum = randLen(special.length)
 
     return special[rndNum]
@@ -76,5 +76,8 @@ export default function passwordGen(words, maxLen, joinStr) {
         passwords.push(numberString())
     }
 
-    return passwords.reduce((p, w, i) => i === 0 ? w : `${p}${joinStr === true ? randomJoin() : joinStr}${w}`, '')
+    return passwords.reduce(
+        (p, w, i) => (i === 0 ? w : `${p}${joinStr === true ? randomJoin() : joinStr}${w}`),
+        ''
+    )
 }

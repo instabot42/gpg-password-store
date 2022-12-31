@@ -4,7 +4,6 @@ import Database from '../common/db.js'
 
 const term = terminal.terminal
 
-
 export default async function editCommand(defaultName, options) {
     // See if the title given is a match
     const db = new Database()
@@ -15,7 +14,10 @@ export default async function editCommand(defaultName, options) {
         term.brightGreen('Search (tab for autocomplete):\n')
 
         const all = await db.all()
-        title = await findEntry(defaultName, all.map(i => i.title))
+        title = await findEntry(
+            defaultName,
+            all.map((i) => i.title)
+        )
         id = await db.titleToId(title)
     }
 

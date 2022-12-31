@@ -21,7 +21,9 @@ export function hasClipboardBeenChanged() {
 }
 
 export function copyToClipboard(content) {
-    if (!isEnabled) { return }
+    if (!isEnabled) {
+        return
+    }
 
     // Clip the content to the clipboard
     clipboard.writeSync(content)
@@ -31,7 +33,9 @@ export function copyToClipboard(content) {
 
 export function clearClipboardIfNeeded() {
     clearTimeout(timer)
-    if (!isEnabled) { return }
+    if (!isEnabled) {
+        return
+    }
 
     // If we've not changed the clipboard, no need to clear it later
     if (!hasWrittenToClipboard) {

@@ -1,7 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
 import { encrypt, decrypt } from './encryption.js'
 import * as utils from '../common/file-utils.js'
-
 
 export default class Database {
     /**
@@ -10,14 +9,14 @@ export default class Database {
     constructor() {
         // Get a cleaned gpg key name
         const gpgIdFileContents = utils.readFile('.gpgid')
-        const regex = /[^\w. -]/gi;
+        const regex = /[^\w. -]/gi
         this.gpgId = gpgIdFileContents.replace(regex, '')
 
         // create a default empty db
         this.db = {
             version: 1,
             passwords: [],
-            settings: {}
+            settings: {},
         }
 
         this.loaded = false
@@ -25,7 +24,7 @@ export default class Database {
 
     /**
      * Load in the DB from the filesystem
-     * @returns 
+     * @returns
      */
     async load() {
         if (this.loaded) {
@@ -57,10 +56,16 @@ export default class Database {
     /**
      * Check that the loaded DB file appears to contain the data we need.
      * Will also offer a way to upgrade out of date databases by looking at the version numbers
-     * @param {*} db 
+     * @param {*} db
      */
     validateOrFail(db) {
-        if (!db.version || !db.passwords || !db.settings || !Array.isArray(db.passwords) || (typeof db.settings !== 'object')) {
+        if (
+            !db.version ||
+            !db.passwords ||
+            !db.settings ||
+            !Array.isArray(db.passwords) ||
+            typeof db.settings !== 'object'
+        ) {
             throw new Error('Database invalid')
         }
 
@@ -70,7 +75,7 @@ export default class Database {
 
     /**
      * Get all the settings stored in the DB
-     * @returns 
+     * @returns
      */
     async getConfig() {
         await this.load()
@@ -79,8 +84,8 @@ export default class Database {
 
     /**
      * Update or add a specific settings into the DB
-     * @param {*} name 
-     * @param {*} value 
+     * @param {*} name
+     * @param {*} value
      */
     async setConfig(name, value) {
         await this.load()
@@ -107,7 +112,7 @@ export default class Database {
     async titleToId(title) {
         const all = await this.all()
 
-        const i = all.findIndex(item => item.title === title)
+        const i = all.findIndex((item) => item.title === title)
         if (i === -1) {
             return null
         }
@@ -119,8 +124,8 @@ export default class Database {
      * Creates a new entry in the DB
      * Writes the content to disk (encrypted)
      * Saves the DB back to disk (also encrypted)
-     * @param {*} title 
-     * @param {*} content 
+     * @param {*} title
+     * @param {*} content
      * @returns id of the new entry
      */
     async create(title, content) {
@@ -147,7 +152,7 @@ export default class Database {
     /**
      * Gets the content linked to a DB entry (decrypted)
      * Throws errors if the id is bad, or the content is missing, or decryption fails
-     * @param {*} id 
+     * @param {*} id
      * @returns string
      */
     async get(id) {
@@ -173,10 +178,10 @@ export default class Database {
      * Throws an error if the entry is missing
      * Saves the new content to disk (encrypted)
      * Updates the DB and saves that too (encrypted)
-     * @param {*} id 
-     * @param {*} title 
-     * @param {*} content 
-     * @returns 
+     * @param {*} id
+     * @param {*} title
+     * @param {*} content
+     * @returns
      */
     async update(id, title, content) {
         await this.load()
@@ -208,7 +213,7 @@ export default class Database {
      * Throws errors if the entry does not exist
      * Deletes the content file and removes the entry from the DB
      * The DB is saved (encrypted)
-     * @param {*} id 
+     * @param {*} id
      */
     async delete(id) {
         await this.load()
@@ -233,7 +238,7 @@ export default class Database {
 
     /**
      * Does the given id exist in the DB
-     * @param {*} id 
+     * @param {*} id
      * @returns true|false
      */
     async exists(id) {

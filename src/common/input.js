@@ -1,9 +1,8 @@
 import terminal from 'terminal-kit'
-import { edit } from "external-editor";
+import { edit } from 'external-editor'
 import passwordGen from './password-gen.js'
 
 const term = terminal.terminal
-
 
 async function inputFieldGeneric(opts) {
     return new Promise((resolve, reject) => {
@@ -11,16 +10,16 @@ async function inputFieldGeneric(opts) {
         const inputOptions = {
             autoCompleteMenu: {
                 style: term.white,
-                selectedStyle: term.brightYellow
+                selectedStyle: term.brightYellow,
             },
             style: term.brightBlue,
             hintStyle: term.red,
-            ...opts
+            ...opts,
         }
 
         // ask to choose an option
         term.inputField(inputOptions, (error, input) => {
-            term.grabInput(false);
+            term.grabInput(false)
             term('\n')
             if (error) {
                 return reject(error)
@@ -40,10 +39,9 @@ function autoCompleteSorted(inputStr, all) {
     }
 
     return matches.sort(function (a, b) {
-        return a.toLowerCase().localeCompare(b.toLowerCase());
-    });
+        return a.toLowerCase().localeCompare(b.toLowerCase())
+    })
 }
-
 
 export async function createEntry(baseDir) {
     // Find all possible entries
@@ -58,7 +56,6 @@ export async function createEntry(baseDir) {
         autoCompleteHint: true,
     })
 }
-
 
 export async function findEntry(defaultEntry, all) {
     // function to filter results
@@ -90,8 +87,9 @@ export async function password(words = 4, maxWordLen = 7, joinText = '.') {
 }
 
 export async function yesNo() {
-    // Ask if they want to add 
-    const response = await term.yesOrNo({ yes: ['y', 'ENTER'], no: ['n', 'ESCAPE', 'BACKSPACE'] }).promise
+    // Ask if they want to add
+    const response = await term.yesOrNo({ yes: ['y', 'ENTER'], no: ['n', 'ESCAPE', 'BACKSPACE'] })
+        .promise
     term.grabInput(false)
 
     return response
@@ -100,7 +98,6 @@ export async function yesNo() {
 export async function editor(content) {
     return edit(content)
 }
-
 
 export async function listItems(items) {
     return new Promise((resolve, reject) => {
@@ -111,10 +108,10 @@ export async function listItems(items) {
             cancelable: true,
             leftPadding: '  ',
             selectedLeftPadding: '> ',
-            submittedLeftPadding: '= '
+            submittedLeftPadding: '= ',
         }
 
-        term.grabInput({ mouse: 'button' });
+        term.grabInput({ mouse: 'button' })
 
         term.singleColumnMenu(items, options, function (error, response) {
             term.grabInput(false)
@@ -123,6 +120,6 @@ export async function listItems(items) {
             }
 
             return resolve(response)
-        });
+        })
     })
 }

@@ -5,7 +5,6 @@ import Database from '../common/db.js'
 
 const term = terminal.terminal
 
-
 function extractItems(content) {
     // Extract the first line
     const lines = content.split('\n')
@@ -36,7 +35,10 @@ export default async function showCommand(defaultTitle, options) {
         term.brightGreen('Search (tab for autocomplete):\n')
 
         const all = await db.all()
-        title = await findEntry(defaultTitle, all.map(i => i.title))
+        title = await findEntry(
+            defaultTitle,
+            all.map((i) => i.title)
+        )
         id = await db.titleToId(title)
     }
 
@@ -64,7 +66,13 @@ export default async function showCommand(defaultTitle, options) {
         while (keepGoing) {
             // show the list of items to copy to the clipboard
             term.brightGreen('Copy fields to clipboard? (ESC to abort)')
-            const result = await listItems(items.map((i) => i.name.toLowerCase().includes('password') ? `${i.name} => ************` : `${i.name} => ${i.value}`))
+            const result = await listItems(
+                items.map((i) =>
+                    i.name.toLowerCase().includes('password')
+                        ? `${i.name} => ************`
+                        : `${i.name} => ${i.value}`
+                )
+            )
 
             // copy it and go around again, or cancel
             if (result?.canceled) {
@@ -77,4 +85,3 @@ export default async function showCommand(defaultTitle, options) {
         }
     }
 }
-

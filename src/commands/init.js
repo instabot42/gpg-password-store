@@ -1,4 +1,4 @@
-import terminal from 'terminal-kit';
+import terminal from 'terminal-kit'
 import * as utils from '../common/file-utils.js'
 const term = terminal.terminal
 

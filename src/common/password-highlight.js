@@ -3,8 +3,8 @@ const term = terminal.terminal
 
 /**
  * True if str matches the regex given
- * @param {*} regex 
- * @param {*} str 
+ * @param {*} regex
+ * @param {*} str
  */
 function match(regex, str) {
     return regex.exec(str) !== null
@@ -12,7 +12,7 @@ function match(regex, str) {
 
 /**
  * Log the password out (with syntax colouring)
- * @param {*} p 
+ * @param {*} p
  */
 export function passwordColoured(p) {
     for (let i = 0; i < p.length; i += 1) {

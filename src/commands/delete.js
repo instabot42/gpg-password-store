@@ -4,7 +4,6 @@ import Database from '../common/db.js'
 
 const term = terminal.terminal
 
-
 export default async function deleteCommand(defaultTitle, options) {
     // See if the title given is a match
     const db = new Database()
@@ -15,7 +14,10 @@ export default async function deleteCommand(defaultTitle, options) {
         term.brightRed('Search for item to DELETE (tab for autocomplete):\n')
 
         const all = await db.all()
-        title = await input.findEntry(defaultTitle, all.map(i => i.title))
+        title = await input.findEntry(
+            defaultTitle,
+            all.map((i) => i.title)
+        )
         id = await db.titleToId(title)
     }
 
@@ -32,7 +34,9 @@ export default async function deleteCommand(defaultTitle, options) {
         return
     }
 
-    term.brightRed(`OK. Delete ${title}. Are you really sure? (y or enter to delete, n to cancel)\n`)
+    term.brightRed(
+        `OK. Delete ${title}. Are you really sure? (y or enter to delete, n to cancel)\n`
+    )
     const confirm = await input.yesNo()
     if (confirm) {
         term.brightRed(`Going to delete ${title}...\n`)
