@@ -9,8 +9,9 @@ export default class Database {
     constructor() {
         // Get a cleaned gpg key name
         const gpgIdFileContents = utils.readFile('.gpgid')
-        const regex = /[^\w. -]/gi
-        this.gpgId = gpgIdFileContents.replace(regex, '')
+        const regex = /\s+|,/g
+        const ids = gpgIdFileContents.split(regex)
+        this.gpgIds = ids.filter((v) => v !== '')
 
         // create a default empty db
         this.db = {
@@ -37,7 +38,7 @@ export default class Database {
         }
 
         const dbEncrypted = utils.readFile('.db')
-        const dbJson = await decrypt(dbEncrypted, this.gpgId)
+        const dbJson = await decrypt(dbEncrypted)
 
         this.validateOrFail(JSON.parse(dbJson))
         this.loaded = true
@@ -48,7 +49,7 @@ export default class Database {
      */
     async save() {
         const dbJson = JSON.stringify(this.db)
-        const dbEncrypted = await encrypt(dbJson, this.gpgId)
+        const dbEncrypted = await encrypt(dbJson, this.gpgIds)
 
         utils.writeWithBackup('.db', dbEncrypted)
     }
@@ -135,7 +136,7 @@ export default class Database {
         const id = uuidv4()
 
         // encrypt the content
-        const encrypted = await encrypt(content, this.gpgId)
+        const encrypted = await encrypt(content, this.gpgIds)
 
         // write the content to disk
         utils.writeFile(id, encrypted)
@@ -170,7 +171,7 @@ export default class Database {
 
         // get the contents of id (decrypted)
         const encrypted = utils.readFile(id)
-        return decrypt(encrypted, this.gpgId)
+        return decrypt(encrypted)
     }
 
     /**
@@ -197,7 +198,7 @@ export default class Database {
         }
 
         // encrypt and write the content
-        const encrypted = await encrypt(content, this.gpgId)
+        const encrypted = await encrypt(content, this.gpgIds)
         utils.writeFile(id, encrypted)
 
         // update the db
