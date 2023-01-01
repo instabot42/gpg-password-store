@@ -105,11 +105,11 @@ program
 program
     .command('init')
     .argument(
-        '<gpgKeyPairId,gpgKeyPairId>',
+        '[gpgKeyPairId,gpgKeyPairId]',
         'name / ID of the GPG keypairs that will be used for encryption/decryption.'
     )
     .description(
-        'Create the target folder that will be used to store everything. To encrypt to many key pairs, comma separate them'
+        'Create the target folder that will be used to store everything, and define which GPG keys will be used for encryption / decryption. To encrypt to many key pairs, comma separate them'
     )
     .action(async (gpgKeyPair) => initCommand(gpgKeyPair, program.opts()))
 

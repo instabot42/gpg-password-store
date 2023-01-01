@@ -1,6 +1,6 @@
 # GPG Password Store
 
-Inspired by pass (https://www.passwordstore.org/), but I wanted more control over some aspects and getting tab completion to work was proving too hard. Also, it seemed like a fun thing to build.
+Inspired by pass (https://www.passwordstore.org/), but I wanted some features to work differently and to make it more interactive to use. Also, it seemed like a fun thing to build.
 
 Note, I built this just for fun - it's not audited and it's not my job to maintain it. Use it if you like. or don't.
 
@@ -18,35 +18,21 @@ Note, I built this just for fun - it's not audited and it's not my job to mainta
 
 Don't forget to backup your GPG key pairs. Without them you won't be able to every recover your passwords.
 
-### What different vs pass
-
-The cli behaves a little differently - enough to be not a drop in replacement. This project uses more interactive features that gets input from the user (for example, when looking up a password we have auto-completion and don't expect the full name of the password to be entered on the command line)
-
-pass stores each of your passwords in a separate file. The filename of the file is the name of the password. For example, if you store a password for `amazon.com`, it would be in a file called `amazon.com.gpg`. This is undesiable, as it reveals which password is which and also which sites and services you use. This is assuming you back up your password data somewhere that someone else could see (eg git, dropbox, google drive etc).
-
-This implemenation works a little different. First, each file uses a UUID as the filename. Second, we have added a database file to the folder that contains a mapping from password name to the UUID used. This database file is also encrypted using your GPG keys, so the sites you use is hidden and it is harder to target a specific gpg file for a high value account. The database is only used for this mapping, so if this file is lost or corrupted, you can still recover your passwords using GPG command line tools.
-
-The format of the decrypted password file is the same though (first line has the password in it, rest of the file using any format you like, but encourages the format of `Label: value` for additional fields).
-
 ## Setup
 
-### Install GPG
+What you'll need...
 
-https://gpgtools.org/
-The tool just calls the gpg command line tools under the hood, so they need to be installed
+-   GPG command line tools (this tool uses GPG for all encryption etc). https://gpgtools.org/
+-   On a mac, pinentry-mac is kind of useful. Other platforms have similar pin entry tools. If you see errors along the lines of `public key decryption failed: Inappropriate ioctl for device`, this is likely caused by GPG wanting to ask you for the pin/passphrase for your key, but not being able to.
+-   Node.js - any current version should be fine.
 
-### Install pinentry
+Then you can install GPG Password store
 
-Also add pinentry-mac if you are running on a mac. This enable requests for key pair passwords to popup a dialog asking for it.
-If you see errors like 'public key decryption failed: Inappropriate ioctl for device', this will be the fix.
-`brew install pinentry-mac`
-
-See https://github.com/Homebrew/homebrew-core/issues/14737 for more on this
-https://gpgtools.tenderapp.com/kb/faq/password-management
-
-### Set up dependencies
-
-`npm ci`
+```
+git clone https://github.com/instabot42/gpg-password-store.git
+cd gpg-password-store
+npm ci
+```
 
 ### Environment
 
@@ -71,9 +57,12 @@ Examples below assumes you have set up an alias shown above.
 
 #### Set up password store
 
-`pass init <Name-Of-GPG-Key-To-Use-For-Encryption,And-Another-Key,Third-Key>`
+`pass init [Name-Of-GPG-Key-To-Use-For-Encryption,And-Another-Key,Third-Key]`
 
-You'll need to do this before you can use any other commands. You can provide a list of keys, separated by commas
+You'll need to do this before you can use any other commands.
+This will firstly create a folder (`~/.gpg-store` by default), to store all your passwords in (encrypted, obviously).
+The command expects an argument that is the name / keyID of the GPG keys you would like to use for all encryption / decryption
+You can provide a list of keys, separated by commas
 
 #### Add a new password to the DB
 
