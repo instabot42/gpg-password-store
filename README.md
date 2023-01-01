@@ -40,9 +40,15 @@ sudo apt-get install kgpg
 
 **Mac**
 
-https://gpgtools.org/
+```
+brew install gnupg
+brew install pinentry-mac
+```
+
+See https://formulae.brew.sh/formula/gnupg and https://formulae.brew.sh/formula/pinentry-mac#default for more details, or use the GUI tools from https://gpgtools.org/
 
 After you have installed GPG, create a set of keys.
+Ultimate Guide on setting up GPG with YubiKeys: https://github.com/drduh/YubiKey-Guide
 
 #### Setup GPG Password Store
 
@@ -140,7 +146,7 @@ If you want to add fields that will appear in the clipboard list though, use the
 Label: Value
 ```
 
-# Credits
+## Credits
 
 Heavily inspired by https://www.passwordstore.org/
 
