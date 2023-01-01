@@ -171,7 +171,6 @@ program
 // The Generate Password command
 program
     .command('generate-password')
-    .alias('g')
     .alias('gen')
     .option(
         '-w, --word-count <wordcount>',
