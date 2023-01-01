@@ -22,11 +22,31 @@ Don't forget to backup your GPG key pairs. Without them you won't be able to eve
 
 What you'll need...
 
--   GPG command line tools (this tool uses GPG for all encryption etc). https://gpgtools.org/
+-   GPG command line tools (this tool uses GPG for all encryption etc).
 -   On a mac, pinentry-mac is kind of useful. Other platforms have similar pin entry tools. If you see errors along the lines of `public key decryption failed: Inappropriate ioctl for device`, this is likely caused by GPG wanting to ask you for the pin/passphrase for your key, but not being able to.
 -   Node.js - any current version should be fine.
 
-Then you can install GPG Password store
+#### Install GPG
+
+**Linux**
+
+```
+# gpg command line
+sudo apt-get install gnupg
+
+# A gui for Ubuntu if you like...
+sudo apt-get install kgpg
+```
+
+**Mac**
+
+https://gpgtools.org/
+
+After you have installed GPG, create a set of keys.
+
+#### Setup GPG Password Store
+
+Now you can install GPG Password store
 
 ```
 git clone https://github.com/instabot42/gpg-password-store.git
