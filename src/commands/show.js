@@ -66,26 +66,35 @@ export default async function showCommand(defaultTitle, options) {
         while (keepGoing) {
             // show the list of items to copy to the clipboard
             term.brightGreen('Copy fields to clipboard? (ESC to abort)')
-            const result = await listItems(
-                items.map((i) =>
-                    i.name.toLowerCase().includes('password')
-                        ? `${i.name} => ************`
-                        : `${i.name} => ${i.value}`
-                ),
-                selectedIndex
+
+            // mask password on-screen
+            const mappedItems = items.map((i) =>
+                i.name.toLowerCase().includes('password')
+                    ? `${i.name} => ************`
+                    : `${i.name} => ${i.value}`
             )
+
+            // add an entry to show everything
+            mappedItems.push('Show Full Record')
+
+            const result = await listItems(mappedItems, selectedIndex)
 
             // copy it and go around again, or cancel
             if (result?.canceled) {
                 keepGoing = false
             } else {
-                const value = items[result.selectedIndex].value
-                copyToClipboard(value)
-                term.brightCyan(`\n>>'${items[result.selectedIndex].name}' copied<<\n\n`)
+                if (result.selectedIndex > items.length - 1) {
+                    selectedIndex = 0
+                    term.brightWhite(content)
+                    term('\n')
+                } else {
+                    const value = items[result.selectedIndex].value
+                    copyToClipboard(value)
+                    term.brightCyan(`\n>>'${items[result.selectedIndex].name}' copied<<\n\n`)
 
-                // default to the next entry
-                selectedIndex =
-                    result.selectedIndex >= items.length - 1 ? 0 : result.selectedIndex + 1
+                    // default to the next entry
+                    selectedIndex = result.selectedIndex + 1
+                }
             }
         }
     }
