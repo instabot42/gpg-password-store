@@ -55,6 +55,9 @@ Examples below assumes you have set up an alias shown above.
 
 `pass help`
 
+or, if you didn't set up an alias
+`./src/pass.js help`
+
 #### Set up password store
 
 `pass init [Name-Of-GPG-Key-To-Use-For-Encryption,And-Another-Key,Third-Key]`
