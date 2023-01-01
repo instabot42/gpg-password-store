@@ -1,7 +1,5 @@
 import terminal from 'terminal-kit'
 import { v4 as uuidv4 } from 'uuid'
-import { encrypt, decrypt } from './encryption.js'
-import * as utils from '../common/file-utils.js'
 
 const term = terminal.terminal
 const currentDBVersion = 2
@@ -10,7 +8,13 @@ export default class Database {
     /**
      * Set up an empty DB
      */
-    constructor() {
+    constructor(fs, gpg) {
+        // a FileServices
+        this.fs = fs
+
+        // the GPG class (encrypt and decrypt)
+        this.gpg = gpg
+
         // create a default empty db
         this.db = {
             version: currentDBVersion,
@@ -27,7 +31,7 @@ export default class Database {
      * @param {*} idList
      */
     async initDB(idList) {
-        if (utils.fileExists('.db')) {
+        if (this.fs.fileExists('.db')) {
             // Already exists, so update the keys
             await this.load()
 
@@ -68,12 +72,12 @@ export default class Database {
         }
 
         // no db yet, save the empty one
-        if (!utils.fileExists('.db')) {
+        if (!this.fs.fileExists('.db')) {
             throw new Error("DB not found. use 'pass init' to setup DB")
         }
 
-        const dbEncrypted = utils.readFile('.db')
-        const dbJson = await decrypt(dbEncrypted)
+        const dbEncrypted = this.fs.readFile('.db')
+        const dbJson = await this.gpg.decrypt(dbEncrypted)
 
         this.validateOrFail(JSON.parse(dbJson))
         this.loaded = true
@@ -84,9 +88,9 @@ export default class Database {
      */
     async save() {
         const dbJson = JSON.stringify(this.db)
-        const dbEncrypted = await encrypt(dbJson, this.db.gpgIds)
+        const dbEncrypted = await this.gpg.encrypt(dbJson, this.db.gpgIds)
 
-        utils.writeWithBackup('.db', dbEncrypted)
+        this.fs.writeWithBackup('.db', dbEncrypted)
     }
 
     /**
@@ -108,7 +112,7 @@ export default class Database {
         // Version 1 did not have gpg keys inside the DB. Upgrade from v1 to current version
         if (db.version === 1) {
             // Get a cleaned gpg key name
-            const gpgIdFileContents = utils.readFile('.gpgid')
+            const gpgIdFileContents = this.fs.readFile('.gpgid')
             db.gpgIds = gpgIdFileContents
                 .split(',')
                 .map((v) => v.replace(/\s+/g, ''))
@@ -204,10 +208,10 @@ export default class Database {
         const id = uuidv4()
 
         // encrypt the content
-        const encrypted = await encrypt(content, this.db.gpgIds)
+        const encrypted = await this.gpg.encrypt(content, this.db.gpgIds)
 
         // write the content to disk
-        utils.writeFile(id, encrypted)
+        this.fs.writeFile(id, encrypted)
 
         // insert entry into db
         const now = Date.now()
@@ -234,7 +238,7 @@ export default class Database {
             throw new Error(`No password entry with id ${id}`)
         }
 
-        if (!utils.fileExists(id)) {
+        if (!this.fs.fileExists(id)) {
             throw new Error(`No content file for id ${id}`)
         }
 
@@ -243,8 +247,8 @@ export default class Database {
         await this.save()
 
         // get the contents of id (decrypted)
-        const encrypted = utils.readFile(id)
-        return decrypt(encrypted)
+        const encrypted = this.fs.readFile(id)
+        return this.gpg.decrypt(encrypted)
     }
 
     /**
@@ -266,13 +270,13 @@ export default class Database {
             throw new Error(`No password entry with id ${id}`)
         }
 
-        if (!utils.fileExists(id)) {
+        if (!this.fs.fileExists(id)) {
             throw new Error(`No content file for id ${id}`)
         }
 
         // encrypt and write the content
-        const encrypted = await encrypt(content, this.db.gpgIds)
-        utils.writeFile(id, encrypted)
+        const encrypted = await this.gpg.encrypt(content, this.db.gpgIds)
+        this.fs.writeFile(id, encrypted)
 
         // update the db
         this.db.passwords[i].title = title
@@ -302,11 +306,11 @@ export default class Database {
             throw new Error(`No password entry with id ${id}`)
         }
 
-        if (!utils.fileExists(id)) {
+        if (!this.fs.fileExists(id)) {
             throw new Error(`No content file for id ${id}`)
         }
 
-        if (utils.deleteFile(id)) {
+        if (this.fs.deleteFile(id)) {
             this.db.passwords = this.db.passwords.filter((p) => p.id !== id)
         }
 
@@ -328,7 +332,7 @@ export default class Database {
             return false
         }
 
-        if (!utils.fileExists(id)) {
+        if (!this.fs.fileExists(id)) {
             return false
         }
 

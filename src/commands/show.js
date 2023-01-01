@@ -2,6 +2,8 @@ import terminal from 'terminal-kit'
 import { copyToClipboard } from '../common/clip.js'
 import { findEntry, listItems } from '../common/input.js'
 import Database from '../common/db.js'
+import FileServices from '../common/file-services.js'
+import Gpg from '../common/gpg.js'
 
 const term = terminal.terminal
 
@@ -27,7 +29,7 @@ function extractItems(content) {
 
 export default async function showCommand(defaultTitle, options) {
     // See if the title given is a match
-    const db = new Database()
+    const db = new Database(FileServices, Gpg)
     let id = await db.titleToId(defaultTitle)
     let title = defaultTitle
     if (id === null) {

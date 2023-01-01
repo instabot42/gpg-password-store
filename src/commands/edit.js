@@ -1,12 +1,14 @@
 import terminal from 'terminal-kit'
 import { findEntry, editor } from '../common/input.js'
 import Database from '../common/db.js'
+import FileServices from '../common/file-services.js'
+import Gpg from '../common/gpg.js'
 
 const term = terminal.terminal
 
 export default async function editCommand(defaultName, options) {
     // See if the title given is a match
-    const db = new Database()
+    const db = new Database(FileServices, Gpg)
     let id = await db.titleToId(defaultName)
     let title = defaultName
     if (id === null) {

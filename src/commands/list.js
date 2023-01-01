@@ -1,12 +1,14 @@
 import terminal from 'terminal-kit'
 import Database from '../common/db.js'
+import FileServices from '../common/file-services.js'
+import Gpg from '../common/gpg.js'
 
 const term = terminal.terminal
 
 export default async function listCommand(options) {
     term.brightGreen('Password Store\n')
 
-    const db = new Database()
+    const db = new Database(FileServices, Gpg)
     const all = await (
         await db.allTitles()
     ).sort((a, b) => {

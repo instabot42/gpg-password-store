@@ -1,11 +1,13 @@
 import terminal from 'terminal-kit'
-import * as utils from '../common/file-utils.js'
 import * as input from '../common/input.js'
 import Database from '../common/db.js'
+import FileServices from '../common/file-services.js'
+import Gpg from '../common/gpg.js'
+
 const term = terminal.terminal
 
 export default async function initCommand(gpgIds) {
-    if (utils.createBaseFolder()) {
+    if (FileServices.createBaseFolder()) {
         let keys = gpgIds
         if (!keys) {
             term.brightGreen(
@@ -15,10 +17,10 @@ export default async function initCommand(gpgIds) {
         }
 
         // Attempt to create a new DB, giving it the keys given
-        const db = new Database()
+        const db = new Database(FileServices, Gpg)
         await db.initDB(keys)
 
-        term.brightCyan(`gpg store at ${utils.getBaseFolder()} ready\n`)
+        term.brightCyan(`gpg store at ${FileServices.getBaseFolder()} ready\n`)
     } else {
         term.brightRed.error(`Unable to create ${path}\n`)
         term.dim.white.error(err)

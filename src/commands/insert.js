@@ -2,11 +2,13 @@ import terminal from 'terminal-kit'
 import { copyToClipboard } from '../common/clip.js'
 import * as input from '../common/input.js'
 import Database from '../common/db.js'
+import FileServices from '../common/file-services.js'
+import Gpg from '../common/gpg.js'
 
 const term = terminal.terminal
 
 export default async function insertCommand(options) {
-    const db = new Database()
+    const db = new Database(FileServices, Gpg)
 
     term.brightGreen('Name of new entry: ')
     const entryName = await input.createEntry(options.baseDir)
