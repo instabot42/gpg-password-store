@@ -141,14 +141,6 @@ program
     .description('Insert a new password into the DB')
     .action(async (options) => insertCommand({ ...program.opts(), ...options }))
 
-// The edit command
-program
-    .command('edit')
-    .alias('e')
-    .argument('[entryName]', 'the name of the entry to lookup', '')
-    .description('Edit an existing entry')
-    .action(async (entryName) => editCommand(entryName, program.opts()))
-
 // The show command
 program
     .command('get', { isDefault: true })
@@ -159,6 +151,14 @@ program
     .option('-s, --show-all', 'Output the whole entry to the terminal', false)
     .description('Search for and show password details')
     .action(async (entryName, options) => showCommand(entryName, { ...program.opts(), ...options }))
+
+// The edit command
+program
+    .command('edit')
+    .alias('e')
+    .argument('[entryName]', 'the name of the entry to lookup', '')
+    .description('Edit an existing entry')
+    .action(async (entryName) => editCommand(entryName, program.opts()))
 
 // The Delete command
 program
@@ -203,6 +203,8 @@ program
     .alias('l')
     .description('List all the passwords')
     .action(async () => listCommand(program.opts()))
+
+// Add Search
 
 try {
     // go go go...

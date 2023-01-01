@@ -15,6 +15,10 @@ export default async function listCommand(options) {
         return al < bl ? -1 : +(al > bl)
     })
 
+    const keyCount = await db.getKeyCount()
+    const keys = await db.getKeyIds()
+    term.dim(`Found ${all.length} entries, encrypted with ${keyCount} GPG key.\n`)
+    term.dim(`Keys: ${keys.join(', ')}\n`)
     if (all.length === 0) {
         term.dim.white('  empty\n')
     } else {

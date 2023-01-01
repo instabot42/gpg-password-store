@@ -38,7 +38,7 @@ export default async function insertCommand(options) {
 
     // encrypt it
     term.dim.white('\nWriting...\n')
-    await db.create(entryName, fullEntry)
+    await db.insert(entryName, fullEntry)
     term.dim.white('Encrypted and saved\n\n')
     term.brightCyan(fullEntry)
 

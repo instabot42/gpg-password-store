@@ -1,25 +1,61 @@
+import terminal from 'terminal-kit'
 import { v4 as uuidv4 } from 'uuid'
 import { encrypt, decrypt } from './encryption.js'
 import * as utils from '../common/file-utils.js'
+
+const term = terminal.terminal
+const currentDBVersion = 2
 
 export default class Database {
     /**
      * Set up an empty DB
      */
     constructor() {
-        // Get a cleaned gpg key name
-        const gpgIdFileContents = utils.readFile('.gpgid')
-        const ids = gpgIdFileContents.split(',')
-        this.gpgIds = ids.map((v) => v.replace(/\s+/g, '')).filter((v) => v !== '')
-
         // create a default empty db
         this.db = {
-            version: 1,
+            version: currentDBVersion,
             passwords: [],
             settings: {},
+            gpgIds: [],
         }
 
         this.loaded = false
+    }
+
+    /**
+     * If the DB does not exist, create a new one and saves it with the given keys
+     * @param {*} idList
+     */
+    async initDB(idList) {
+        if (utils.fileExists('.db')) {
+            // Already exists, so update the keys
+            await this.load()
+
+            const newKeys = this.parseIdList(idList)
+            if (newKeys.length === 0) {
+                throw new Error('Failed to update. No valid keys given.')
+            }
+
+            // show what we are changing
+            term.dim(`Updating keys\nfrom ${this.db.gpgIds.join(', ')}\n`)
+            term.dim(`to   ${newKeys.join(', ')}\n`)
+
+            // update and save
+            this.db.gpgIds = newKeys
+            await this.save()
+
+            // then re-encrypt every entry
+            await this.reEncyptAll()
+        } else {
+            // No DB yet, so keep the keys and try and save
+            this.db.gpgIds = this.parseIdList(idList)
+            if (this.db.gpgIds.length === 0) {
+                throw new Error('No valid key IDs given')
+            }
+
+            // save the DB
+            await this.save()
+        }
     }
 
     /**
@@ -33,7 +69,7 @@ export default class Database {
 
         // no db yet, save the empty one
         if (!utils.fileExists('.db')) {
-            return this.save()
+            throw new Error("DB not found. use 'pass init' to setup DB")
         }
 
         const dbEncrypted = utils.readFile('.db')
@@ -48,7 +84,7 @@ export default class Database {
      */
     async save() {
         const dbJson = JSON.stringify(this.db)
-        const dbEncrypted = await encrypt(dbJson, this.gpgIds)
+        const dbEncrypted = await encrypt(dbJson, this.db.gpgIds)
 
         utils.writeWithBackup('.db', dbEncrypted)
     }
@@ -69,8 +105,41 @@ export default class Database {
             throw new Error('Database invalid')
         }
 
+        // Version 1 did not have gpg keys inside the DB. Upgrade from v1 to current version
+        if (db.version === 1) {
+            // Get a cleaned gpg key name
+            const gpgIdFileContents = utils.readFile('.gpgid')
+            db.gpgIds = gpgIdFileContents
+                .split(',')
+                .map((v) => v.replace(/\s+/g, ''))
+                .filter((v) => v !== '')
+        }
+
         // Saul Goodman
-        this.db = { version: db.version, passwords: db.passwords, settings: db.settings }
+        this.db = {
+            version: currentDBVersion,
+            passwords: db.passwords,
+            settings: db.settings,
+            gpgIds: db.gpgIds,
+        }
+    }
+
+    /**
+     * How many keys are we encoding with
+     * @returns
+     */
+    async getKeyCount() {
+        await this.load()
+        return this.db.gpgIds.length
+    }
+
+    /**
+     * Get the key ids used to sign everything
+     * @returns
+     */
+    async getKeyIds() {
+        await this.load()
+        return this.db.gpgIds
     }
 
     /**
@@ -121,21 +190,21 @@ export default class Database {
     }
 
     /**
-     * Creates a new entry in the DB
+     * Inserts a new entry in the DB
      * Writes the content to disk (encrypted)
      * Saves the DB back to disk (also encrypted)
      * @param {*} title
      * @param {*} content
      * @returns id of the new entry
      */
-    async create(title, content) {
+    async insert(title, content) {
         await this.load()
 
         // generate new id
         const id = uuidv4()
 
         // encrypt the content
-        const encrypted = await encrypt(content, this.gpgIds)
+        const encrypted = await encrypt(content, this.db.gpgIds)
 
         // write the content to disk
         utils.writeFile(id, encrypted)
@@ -188,7 +257,7 @@ export default class Database {
      * @param {*} content
      * @returns
      */
-    async update(id, title, content) {
+    async update(id, title, content, modified = true) {
         await this.load()
 
         // look up the id in the db
@@ -202,12 +271,15 @@ export default class Database {
         }
 
         // encrypt and write the content
-        const encrypted = await encrypt(content, this.gpgIds)
+        const encrypted = await encrypt(content, this.db.gpgIds)
         utils.writeFile(id, encrypted)
 
         // update the db
         this.db.passwords[i].title = title
-        this.db.passwords[i].modifiedAt = Date.now()
+
+        if (modified) {
+            this.db.passwords[i].modifiedAt = Date.now()
+        }
 
         // save db
         await this.save()
@@ -261,5 +333,24 @@ export default class Database {
         }
 
         return true
+    }
+
+    /**
+     * decrypt all entries, and re-encrypt them with the current set of keys
+     */
+    async reEncyptAll() {
+        await this.load()
+        for (const p of this.db.passwords) {
+            term.white(`re-encrypting ${p.title}\n`)
+            const content = await this.get(p.id)
+            await this.update(p.id, p.title, content, false)
+        }
+    }
+
+    parseIdList(ids) {
+        return ids
+            .split(',')
+            .map((v) => v.replace(/\s+/g, ''))
+            .filter((v) => v !== '')
     }
 }

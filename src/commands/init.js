@@ -1,15 +1,13 @@
 import terminal from 'terminal-kit'
 import * as utils from '../common/file-utils.js'
+import Database from '../common/db.js'
 const term = terminal.terminal
 
-export default function initCommand(gpgIds) {
+export default async function initCommand(gpgIds) {
     if (utils.createBaseFolder()) {
-        if (utils.fileExists('.gpgid')) {
-            throw new Error('The folder has already been initialised')
-        }
-
-        // Write the list of keys to
-        utils.writeFile('.gpgid', gpgIds)
+        // Attempt to create a new DB, giving it the keys given
+        const db = new Database()
+        await db.initDB(gpgIds)
 
         term.brightCyan(`gpg store at ${utils.getBaseFolder()} ready\n`)
     } else {
