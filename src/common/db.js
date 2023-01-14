@@ -2,7 +2,7 @@ import terminal from 'terminal-kit'
 import { v4 as uuidv4 } from 'uuid'
 
 const term = terminal.terminal
-const currentDBVersion = 2
+const currentDBVersion = 3
 
 export default class Database {
     /**
@@ -102,13 +102,7 @@ export default class Database {
      * @param {*} db
      */
     validateOrFail(db) {
-        if (
-            !db.version ||
-            !db.passwords ||
-            !db.settings ||
-            !Array.isArray(db.passwords) ||
-            typeof db.settings !== 'object'
-        ) {
+        if (!db.version || !db.passwords || !db.settings || !Array.isArray(db.passwords)) {
             throw new Error('Database invalid')
         }
 
@@ -120,6 +114,17 @@ export default class Database {
                 .split(',')
                 .map((v) => v.replace(/\s+/g, ''))
                 .filter((v) => v !== '')
+        }
+
+        // Changed settings to an array in v3
+        // Since it was not used before v3, we can just change it to an empty array
+        if (db.version < 3) {
+            db.settings = []
+        }
+
+        // Settings should be an array now
+        if (!Array.isArray(db.settings)) {
+            throw new Error('Database invalid (settings)')
         }
 
         // Saul Goodman
@@ -150,12 +155,17 @@ export default class Database {
     }
 
     /**
-     * Get all the settings stored in the DB
+     * Get a named setting (or null if no setting exists)
      * @returns
      */
-    async getConfig() {
+    async getConfigValue(name) {
         await this.load()
-        return this.settings
+        const index = this.db.settings.findIndex((s) => s.name === name)
+        if (index === -1) {
+            return null
+        }
+
+        return this.db.settings[index].value
     }
 
     /**
@@ -163,9 +173,12 @@ export default class Database {
      * @param {*} name
      * @param {*} value
      */
-    async setConfig(name, value) {
+    async setConfigValue(name, value) {
         await this.load()
-        this.settings[name] = value
+
+        // replace the current value
+        this.db.settings = this.db.settings.filter((s) => s.name !== name)
+        this.db.settings.push({ name, value })
 
         // save db
         await this.save()
