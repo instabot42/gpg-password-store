@@ -10,8 +10,19 @@ const term = terminal.terminal
 export default async function insertCommand(options) {
     const db = new Database(FileServices, Gpg)
 
-    term.brightGreen('Name of new entry: ')
-    const entryName = await input.createEntry(options.baseDir)
+    // Pick a name that has not been used
+    let entryName = ''
+    let id = true
+    while (id !== null) {
+        term.brightGreen('Name of new entry: ')
+        entryName = await input.createEntry(options.baseDir)
+
+        // look it up (will be null if there is no existing entry with this name)
+        id = await db.titleToId(entryName)
+        if (id !== null) {
+            term.brightRed(`There is already a record called "${entryName}"\n`)
+        }
+    }
 
     term.brightGreen('Username: ')
     const username = await input.username()
