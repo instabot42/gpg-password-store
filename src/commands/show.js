@@ -69,11 +69,14 @@ export default async function showCommand(defaultTitle, options) {
         term.brightGreen('Copy fields to clipboard? (ESC to abort)')
 
         // mask password on-screen
-        const mappedItems = items.map((i) =>
-            i.name.toLowerCase().includes('pass')
-                ? `${i.name} => ************`
-                : `${i.name} => ${i.value}`
-        )
+        const mappedItems = items.map((i) => {
+            const n = i.name.toLowerCase()
+            if (n.includes('pass') || n.includes('2fa')) {
+                return `${i.name} => ************`
+            }
+
+            return `${i.name} => ${i.value}`
+        })
 
         // add an entry to show everything
         mappedItems.push('Show Full Record')
