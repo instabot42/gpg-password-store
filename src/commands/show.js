@@ -15,7 +15,7 @@ function extractItems(content) {
     }
 
     // Look for fields in the rest of the lines
-    const items = [{ name: 'password', value: lines[0] }]
+    const items = []
     for (let i = 1; i < lines.length; i += 1) {
         const regex = /^([a-z0-9 #._-]+):\s*(.*)$/i
         const m = regex.exec(lines[i])
@@ -62,41 +62,39 @@ export default async function showCommand(defaultTitle, options) {
 
     // pick stuff for clipping
     const items = extractItems(content)
-    if (items.length > 0) {
-        let keepGoing = true
-        let selectedIndex = 0
-        while (keepGoing) {
-            // show the list of items to copy to the clipboard
-            term.brightGreen('Copy fields to clipboard? (ESC to abort)')
+    let keepGoing = true
+    let selectedIndex = 0
+    while (keepGoing) {
+        // show the list of items to copy to the clipboard
+        term.brightGreen('Copy fields to clipboard? (ESC to abort)')
 
-            // mask password on-screen
-            const mappedItems = items.map((i) =>
-                i.name.toLowerCase().includes('password')
-                    ? `${i.name} => ************`
-                    : `${i.name} => ${i.value}`
-            )
+        // mask password on-screen
+        const mappedItems = items.map((i) =>
+            i.name.toLowerCase().includes('pass')
+                ? `${i.name} => ************`
+                : `${i.name} => ${i.value}`
+        )
 
-            // add an entry to show everything
-            mappedItems.push('Show Full Record')
+        // add an entry to show everything
+        mappedItems.push('Show Full Record')
 
-            const result = await listItems(mappedItems, selectedIndex)
+        const result = await listItems(mappedItems, selectedIndex)
 
-            // copy it and go around again, or cancel
-            if (result?.canceled) {
-                keepGoing = false
+        // copy it and go around again, or cancel
+        if (result?.canceled) {
+            keepGoing = false
+        } else {
+            if (result.selectedIndex > items.length - 1) {
+                selectedIndex = 0
+                term.brightWhite(content)
+                term('\n')
             } else {
-                if (result.selectedIndex > items.length - 1) {
-                    selectedIndex = 0
-                    term.brightWhite(content)
-                    term('\n')
-                } else {
-                    const value = items[result.selectedIndex].value
-                    copyToClipboard(value)
-                    term.brightCyan(`\n>>'${items[result.selectedIndex].name}' copied<<\n\n`)
+                const value = items[result.selectedIndex].value
+                copyToClipboard(value)
+                term.brightCyan(`\n>>'${items[result.selectedIndex].name}' copied<<\n\n`)
 
-                    // default to the next entry
-                    selectedIndex = result.selectedIndex + 1
-                }
+                // default to the next entry
+                selectedIndex = result.selectedIndex + 1
             }
         }
     }

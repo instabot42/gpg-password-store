@@ -76,6 +76,9 @@ export default class Database {
             throw new Error("DB not found. use 'pass init' to setup DB")
         }
 
+        // notice, so we know to touch a yubikey
+        term.dim('Decrypting db...\n')
+
         const dbEncrypted = this.fs.readFile('.db')
         const dbJson = await this.gpg.decrypt(dbEncrypted)
 
@@ -245,6 +248,8 @@ export default class Database {
         // update access times
         this.db.passwords[i].accessedAt = Date.now()
         await this.save()
+
+        term.dim('Decrypting record...\n')
 
         // get the contents of id (decrypted)
         const encrypted = this.fs.readFile(id)

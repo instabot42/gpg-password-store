@@ -13,6 +13,9 @@ export default async function insertCommand(options) {
     term.brightGreen('Name of new entry: ')
     const entryName = await input.createEntry(options.baseDir)
 
+    term.brightGreen('Username: ')
+    const username = await input.username()
+
     // ask for a password, or generate one
     term.brightGreen('\nPassword (tab to generate one): ')
     const password = await input.password(
@@ -21,22 +24,13 @@ export default async function insertCommand(options) {
         options.randomJoin ? true : options.joinText
     )
 
-    term.brightGreen('Username: ')
-    const username = await input.username()
-
     // Ask about extra notes
-    term.brightGreen('\nDo you want to add notes (y or Enter), or skip (n, Esc)\n')
+    term.brightGreen('\nDo you want to add notes (y/N)\n')
     const wantNotes = await input.yesNo()
     const notes = wantNotes ? await input.editor('') : ''
 
     // combine all responses into a single doc
-    let fullEntry = `${password}\n${entryName}\n\n`
-    if (username != '') {
-        fullEntry += `Username: ${username}\n`
-    }
-    if (notes !== '') {
-        fullEntry += `\n${notes}`
-    }
+    const fullEntry = `${entryName}\n\nUsername: ${username}\nPassword: ${password}\n\n${notes}`
 
     // encrypt it
     term.dim.white('\nWriting...\n')

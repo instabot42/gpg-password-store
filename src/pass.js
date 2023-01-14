@@ -203,6 +203,18 @@ program
     .description('List all the passwords')
     .action(async () => listCommand(program.opts()))
 
+// Files
+// pass file filename
+// Would read the file and write an encrypted copy of it into the password store
+// The entry would be marked as a file and the original filename remembered
+// When you get an entry and we see if it is a file, it should write it to the 'downloads' folder
+
+// pass setting downloads path
+// sets the default downloads folder where files will be restored to
+
+// pass setting username a,b,c
+// Sets some default usernames you commonly use (eg email addresses) that insert can suggest
+
 // Add Search
 
 try {

@@ -100,7 +100,7 @@ export async function password(words = 4, maxWordLen = 7, joinText = '.') {
 
 export async function yesNo() {
     // Ask if they want to add
-    const response = await term.yesOrNo({ yes: ['y', 'ENTER'], no: ['n', 'ESCAPE', 'BACKSPACE'] })
+    const response = await term.yesOrNo({ yes: ['y'], no: ['n', 'ENTER', 'ESCAPE', 'BACKSPACE'] })
         .promise
     term.grabInput(false)
 
