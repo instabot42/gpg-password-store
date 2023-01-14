@@ -26,15 +26,26 @@ export default async function deleteCommand(defaultTitle, options) {
         return
     }
 
-    term.brightRed(`Type DELETE to confirm you want to delete ${title}\n`)
-    const mustBeDelete = await input.text()
-    if (mustBeDelete !== 'DELETE') {
-        term.brightRed('Cancelled. Item has NOT been deleted.')
-        return
+    let response = ''
+    while (response !== 'DELETE') {
+        term.brightRed(
+            `Type DELETE to confirm you want to delete "${title}", or SHOW to see record\n`
+        )
+        response = await input.text()
+        if (response !== 'DELETE' && response !== 'SHOW') {
+            term.brightRed('Cancelled. Item has NOT been deleted.\n')
+            return
+        }
+
+        // show the content...
+        if (response === 'SHOW') {
+            const content = await db.get(id)
+            term.dim(content)
+        }
     }
 
     term.brightRed(
-        `OK. Delete ${title}. Are you really sure? (y or enter to delete, n to cancel)\n`
+        `OK. Delete "${title}". Are you really sure? (y to delete, n or enter to cancel)\n`
     )
     const confirm = await input.yesNo()
     if (confirm) {
@@ -43,5 +54,7 @@ export default async function deleteCommand(defaultTitle, options) {
         await db.delete(id)
 
         term.brightRed(`...annnnd, it's gone.\n`)
+    } else {
+        term.brightRed('Cancelled. Item has NOT been deleted.\n')
     }
 }
