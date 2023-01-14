@@ -25,7 +25,7 @@ export default async function insertCommand(options) {
     )
 
     // Ask about extra notes
-    term.brightGreen('\nDo you want to add notes (y or Enter), or skip (n, Esc)\n')
+    term.brightGreen('\nDo you want to add notes (y/N)\n')
     const wantNotes = await input.yesNo()
     const notes = wantNotes ? await input.editor('') : ''
 
