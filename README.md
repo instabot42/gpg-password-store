@@ -161,6 +161,17 @@ Some line of text, will not turn into a item that can be copy and pasted.
 this is just some notes
 ```
 
+When you create a new entry, password store will create a text file in the following format...
+
+```
+Name Of Entry
+
+Username: username you entered
+Password: password you created
+
+any notes you added here
+```
+
 ### Other Useful info
 
 Every password entry you create will result in a new text file in your password store folder. The file will contain the GPG encrypted version of your entry.
@@ -201,12 +212,19 @@ To add an extra key, so both your current key, OR the new key can be used, then 
 
 ### Can I use a YubiKey
 
-Yes. Setting it up can be tricky, but here is a good guide that will cover even the most paranoid of you...
+Yes. Setting it up can be tricky, but here are a couple of guides that cover things in detail that will cover even the most paranoid of you...
 
+https://www.bxg.org/blog/2017/11/improving-private-key-security-with-a-yubikey-intro/
 https://github.com/drduh/YubiKey-Guide
+
+Password store will show 'Decrypting db...' when it is trying to decrypt the database and 'Decrypting record...' when trying to decrypt one of your
+password entries. If you are using a YubiKey, you may need to touch the key at this point to allow it to use the private keys stored inside it.
+
+It is recommended that you set up Pin for your yubikey (ie, change the default pin). This will ensure that access to your password data is limited to those
+that have access to the encrypted files, are in physical possesion of your yubikey and know the pin code.
 
 ## Credits
 
-Heavily inspired by https://www.passwordstore.org/
+Originally inspired by https://www.passwordstore.org/
 
 Word list taken from https://www.npmjs.com/package/password (uses the UNLICENSE license)
