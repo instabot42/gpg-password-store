@@ -89,7 +89,7 @@ export default async function showCommand(defaultTitle, options) {
         } else {
             if (result.selectedIndex > items.length - 1) {
                 selectedIndex = 0
-                term.brightWhite(content)
+                term.noFormat(content)
                 term('\n')
             } else {
                 const value = items[result.selectedIndex].value
