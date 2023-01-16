@@ -172,6 +172,32 @@ Password: password you created
 any notes you added here
 ```
 
+### DB Format
+
+The DB is ultra simple. It is a JSON encoded version of the following structure...
+
+```
+{
+    version: 3,
+    passwords: [{
+        id: 'random id',
+        title: 'title of record',
+        createdAt: timestamp,
+        accessedAt: timestamp,
+        modifiedAt: timestamp,
+    }],
+    settings: [{
+        name: 'name of setting',
+        value: 'value of setting'
+    }],
+    gpgIds: ['gpg key id','another key id'],
+}
+```
+
+The json content is then encrypted and the encrypted data stored in a file called `.db` in your gpg-store folder.
+
+Additionally, every time the db is updated, the previous version is moved into the `bak` folder with the current timestamp added to the filename, and the updated .db file is written in it's place. This ensures a full history of the db is available. The contents of the `bak` folder are not used, so old db backups can be deleted if you don't need them.
+
 ### Other Useful info
 
 Every password entry you create will result in a new text file in your password store folder. The file will contain the GPG encrypted version of your entry.
