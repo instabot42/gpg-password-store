@@ -19,7 +19,7 @@ export default class Database {
         this.db = {
             version: currentDBVersion,
             passwords: [],
-            settings: {},
+            settings: [],
             gpgIds: [],
         }
 
