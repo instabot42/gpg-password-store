@@ -44,8 +44,12 @@ export default class FileServices {
     }
 
     static createBaseFolder() {
+        return FileServices.ensureFolderExists(baseDir)
+    }
+
+    static ensureFolderExists(folder) {
         try {
-            fs.mkdirSync(baseDir, { recursive: true })
+            fs.mkdirSync(folder, { recursive: true })
             return true
         } catch (err) {
             return false
@@ -70,7 +74,9 @@ export default class FileServices {
             return writeFile(filename, content)
         }
 
-        const backupName = filename + '.bak'
+        FileServices.ensureFolderExists(`${baseDir}bak/`)
+        const timestamp = Date.now().valueOf()
+        const backupName = `bak/${filename}.${timestamp}.bak`
 
         // remove the existing backup file (if it exists)
         if (FileServices.fileExists(backupName)) {
