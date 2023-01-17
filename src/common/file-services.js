@@ -74,7 +74,10 @@ export default class FileServices {
             return writeFile(filename, content)
         }
 
-        FileServices.ensureFolderExists(`${baseDir}bak/`)
+        // prepare the backup folder
+        FileServices.rotateBackupFolder()
+
+        // pick a name
         const timestamp = Date.now().valueOf()
         const backupName = `bak/${filename}.${timestamp}.bak`
 
@@ -84,10 +87,34 @@ export default class FileServices {
         }
 
         // move the existing file to the backup file
-        fs.renameSync(`${baseDir}${filename}`, `${baseDir}${backupName}`)
+        FileServices.renameFile(filename, backupName)
 
         // write the new file
         return FileServices.writeFile(filename, content)
+    }
+
+    static renameFile(from, to) {
+        fs.renameSync(`${baseDir}${from}`, `${baseDir}${to}`)
+    }
+
+    static rotateBackupFolder() {
+        // Keep the last N files in the backup folder
+        const backupFolder = `${baseDir}bak/`
+        FileServices.ensureFolderExists(backupFolder)
+
+        // Find all the backup files
+        const filenames = fs.readdirSync(backupFolder).sort()
+        if (filenames.length < 25) {
+            // less than 25, so leave it
+            return
+        }
+
+        // clear down to 20 (so we clear out 5 from time to time)
+        const toDelete = filenames.slice(0, filenames.length - 20)
+        toDelete.forEach((file) => {
+            const filename = `${backupFolder}${file}`
+            fs.unlinkSync(filename)
+        })
     }
 }
 

@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 const term = terminal.terminal
 const currentDBVersion = 3
+const dbFilename = 'db'
 
 export default class Database {
     /**
@@ -31,7 +32,7 @@ export default class Database {
      * @param {*} idList
      */
     async initDB(idList) {
-        if (this.fs.fileExists('.db')) {
+        if (this.fs.fileExists(dbFilename)) {
             // Already exists, so update the keys
             await this.load()
 
@@ -72,14 +73,20 @@ export default class Database {
         }
 
         // no db yet, save the empty one
-        if (!this.fs.fileExists('.db')) {
-            throw new Error("DB not found. use 'pass init' to setup DB")
+        if (!this.fs.fileExists(dbFilename)) {
+            // See if the old version of the file is still there (we changed from .db to db at some point)
+            if (this.fs.fileExists('.db')) {
+                term.dim('Found legacy DB file - moved to new version...\n')
+                this.fs.renameFile('.db', dbFilename)
+            } else {
+                throw new Error("DB not found. use 'pass init' to setup DB")
+            }
         }
 
         // notice, so we know to touch a yubikey
         term.dim('Decrypting db...\n')
 
-        const dbEncrypted = this.fs.readFile('.db')
+        const dbEncrypted = this.fs.readFile(dbFilename)
         const dbJson = await this.gpg.decrypt(dbEncrypted)
 
         this.validateOrFail(JSON.parse(dbJson))
@@ -93,7 +100,7 @@ export default class Database {
         const dbJson = JSON.stringify(this.db)
         const dbEncrypted = await this.gpg.encrypt(dbJson, this.db.gpgIds)
 
-        this.fs.writeWithBackup('.db', dbEncrypted)
+        this.fs.writeWithBackup(dbFilename, dbEncrypted)
     }
 
     /**
