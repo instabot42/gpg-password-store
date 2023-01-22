@@ -206,14 +206,32 @@ export default class Database {
     }
 
     async titleToId(title) {
-        const all = await this.all()
+        if (!title) {
+            return null
+        }
 
+        const all = await this.all()
         const i = all.findIndex((item) => item.title === title)
         if (i === -1) {
             return null
         }
 
         return all[i].id
+    }
+
+    async idToTitle(id) {
+        if (!id) {
+            return null
+        }
+
+        const all = await this.all()
+
+        const i = all.findIndex((p) => p.id === id)
+        if (i === -1) {
+            return null
+        }
+
+        return all[i].title
     }
 
     /**

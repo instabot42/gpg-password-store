@@ -55,6 +55,10 @@ function autoCompleteSorted(inputStr, all) {
         .map((e) => e.title)
 }
 
+export async function tryAutocomplete(inputStr, all) {
+    return autoCompleteSorted(inputStr, all)
+}
+
 export async function createEntry(baseDir) {
     // Find all possible entries
     const all = []
@@ -79,6 +83,7 @@ export async function findEntry(defaultEntry, all) {
         default: defaultEntry,
         autoComplete,
         autoCompleteHint: true,
+        cancelable: true,
     })
 }
 
@@ -87,7 +92,7 @@ export async function username() {
 }
 
 export async function text() {
-    return inputFieldGeneric({})
+    return inputFieldGeneric({ cancelable: true })
 }
 
 export async function password(words = 4, maxWordLen = 7, joinText = '.') {

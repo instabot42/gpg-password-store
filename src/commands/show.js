@@ -1,6 +1,7 @@
 import terminal from 'terminal-kit'
 import { copyToClipboard } from '../common/clip.js'
-import { findEntry, listItems } from '../common/input.js'
+import { listItems } from '../common/input.js'
+import findRecordFromTitle from '../common/find-record.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
 import Gpg from '../common/gpg.js'
@@ -30,29 +31,16 @@ function extractItems(content) {
 export default async function showCommand(defaultTitle, options) {
     // See if the title given is a match
     const db = new Database(FileServices, Gpg)
-    let id = await db.titleToId(defaultTitle)
-    let title = defaultTitle
-    if (id === null) {
-        // no match yet, so ask the user
-        term.brightGreen('Search (tab for autocomplete):\n')
-
-        const all = await db.all()
-        title = await findEntry(defaultTitle, all)
-        id = await db.titleToId(title)
-    }
-
-    // Check we got one
-    if (id === null) {
-        throw new Error(`No entry found with the title of '${title}'`)
-    }
+    const id = await findRecordFromTitle(db, defaultTitle)
 
     // fetch the content
     const content = await db.get(id)
+    const FullTitle = await db.idToTitle(id)
+    term.brightYellow(`${FullTitle}\n`)
 
     // Show it
     if (options.showAll) {
-        term.brightWhite(content)
-        term('\n')
+        term.noFormat(`${content}\n`)
     }
 
     // skip the clipboard?
@@ -89,8 +77,7 @@ export default async function showCommand(defaultTitle, options) {
         } else {
             if (result.selectedIndex > items.length - 1) {
                 selectedIndex = 0
-                term.noFormat(content)
-                term('\n')
+                term.noFormat(`${content}\n`)
             } else {
                 const value = items[result.selectedIndex].value
                 copyToClipboard(value)

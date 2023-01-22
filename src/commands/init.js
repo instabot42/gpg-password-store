@@ -14,6 +14,9 @@ export default async function initCommand(gpgIds) {
                 'Enter name of GPG Keys to use for encryption/decrption (comma separate multiple keys):\n'
             )
             keys = await input.text()
+            if (!keys || keys === '') {
+                throw new Error('must provide a GPG key id / name')
+            }
         }
 
         // Attempt to create a new DB, giving it the keys given

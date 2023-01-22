@@ -1,5 +1,6 @@
 import terminal from 'terminal-kit'
 import * as input from '../common/input.js'
+import findRecordFromTitle from '../common/find-record.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
 import Gpg from '../common/gpg.js'
@@ -9,22 +10,10 @@ const term = terminal.terminal
 export default async function deleteCommand(defaultTitle, options) {
     // See if the title given is a match
     const db = new Database(FileServices, Gpg)
-    let id = await db.titleToId(defaultTitle)
-    let title = defaultTitle
-    if (id === null) {
-        // no match yet, so ask the user
-        term.brightRed('Search for item to DELETE (tab for autocomplete):\n')
 
-        const all = await db.all()
-        title = await input.findEntry(defaultTitle, all)
-        id = await db.titleToId(title)
-    }
-
-    // After all that, see if we have something valid
-    if (id === null) {
-        term.brightRed.error(`${title} could not be found.\n`)
-        return
-    }
+    term.brightRed('Maybe DELETE Record...\n')
+    const id = await findRecordFromTitle(db, defaultTitle)
+    const title = await db.idToTitle(id)
 
     let response = ''
     while (response !== 'DELETE') {

@@ -200,8 +200,11 @@ program
     .command('list')
     .alias('ls')
     .alias('l')
+    .option('-c, --sort-created', 'Sort by creation date (oldest first)')
+    .option('-m, --sort-modified', 'Sort by modified date (oldest first)')
+    .option('-a, --sort-accessed', 'Sort by last accessed date (oldest first)')
     .description('List all the passwords')
-    .action(async () => listCommand(program.opts()))
+    .action(async (options) => listCommand({ ...program.opts(), ...options }))
 
 // Files
 // pass file filename
@@ -221,6 +224,5 @@ try {
     // go go go...
     await program.parseAsync(process.argv)
 } catch (err) {
-    term.brightRed.error('\nError handling command\n')
     term.brightRed.error(`${err.message}\n`)
 }
