@@ -304,7 +304,7 @@ export default class Database {
      * @param {*} content
      * @returns
      */
-    async update(id, title, content, modified = true) {
+    async update(id, content, modified = true) {
         await this.load()
 
         // look up the id in the db
@@ -321,12 +321,27 @@ export default class Database {
         const encrypted = await this.gpg.encrypt(content, this.db.gpgIds)
         this.fs.writeFile(id, encrypted)
 
-        // update the db
-        this.db.passwords[i].title = title
-
         if (modified) {
             this.db.passwords[i].modifiedAt = Date.now()
         }
+
+        // save db
+        await this.save()
+        return id
+    }
+
+    async rename(id, newTitle) {
+        await this.load()
+
+        // look up the id in the db
+        const i = this.db.passwords.findIndex((p) => p.id === id)
+        if (i === -1) {
+            throw new Error(`No password entry with id ${id}`)
+        }
+
+        // update the name
+        this.db.passwords[i].title = newTitle
+        this.db.passwords[i].modifiedAt = Date.now()
 
         // save db
         await this.save()
@@ -390,7 +405,7 @@ export default class Database {
         for (const p of this.db.passwords) {
             term.white(`re-encrypting ${p.title}\n`)
             const content = await this.get(p.id)
-            await this.update(p.id, p.title, content, false)
+            await this.update(p.id, content, false)
         }
     }
 

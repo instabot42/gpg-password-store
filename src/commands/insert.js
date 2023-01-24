@@ -3,6 +3,7 @@ import { copyToClipboard } from '../common/clip.js'
 import * as input from '../common/input.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
+import pickName from '../common/pick-name.js'
 import Gpg from '../common/gpg.js'
 
 const term = terminal.terminal
@@ -10,19 +11,8 @@ const term = terminal.terminal
 export default async function insertCommand(options) {
     const db = new Database(FileServices, Gpg)
 
-    // Pick a name that has not been used
-    let entryName = ''
-    let id = true
-    while (id !== null) {
-        term.brightGreen('Name of new entry: ')
-        entryName = await input.createEntry(options.baseDir)
-
-        // look it up (will be null if there is no existing entry with this name)
-        id = await db.titleToId(entryName)
-        if (id !== null) {
-            term.brightRed(`There is already a record called "${entryName}"\n`)
-        }
-    }
+    // Pick a unique name for the record
+    const entryName = await pickName(db)
 
     term.brightGreen('Username: ')
     const username = await input.username()
