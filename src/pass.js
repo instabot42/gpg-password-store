@@ -6,6 +6,7 @@ import { clearClipboardIfNeeded, disableClipboard, hasClipboardBeenChanged } fro
 import showCommand from './commands/show.js'
 import initCommand from './commands/init.js'
 import editCommand from './commands/edit.js'
+import renameCommand from './commands/rename.js'
 import insertCommand from './commands/insert.js'
 import deleteCommand from './commands/delete.js'
 import generatePasswordCommand from './commands/generate-password.js'
@@ -159,6 +160,13 @@ program
     .argument('[entryName]', 'the name of the entry to lookup', '')
     .description('Edit an existing entry')
     .action(async (entryName) => editCommand(entryName, program.opts()))
+
+// The edit command
+program
+    .command('rename')
+    .argument('[entryName]', 'the name / part name of the entry to rename', '')
+    .description('Change the name of an entry')
+    .action(async (entryName) => renameCommand(entryName, program.opts()))
 
 // The Delete command
 program

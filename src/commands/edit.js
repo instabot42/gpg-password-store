@@ -22,7 +22,7 @@ export default async function editCommand(defaultName, options) {
         term.brightCyan('No changes made.\n')
     } else {
         // encrypt it and write it back
-        await db.update(id, FullTitle, updated)
+        await db.update(id, updated)
         term.brightCyan(`${FullTitle} updated\n`)
     }
 }

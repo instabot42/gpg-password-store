@@ -59,7 +59,7 @@ export async function tryAutocomplete(inputStr, all) {
     return autoCompleteSorted(inputStr, all)
 }
 
-export async function createEntry(baseDir) {
+export async function createEntry() {
     // Find all possible entries
     const all = []
 

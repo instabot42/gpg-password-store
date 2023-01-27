@@ -71,7 +71,7 @@ export default class FileServices {
     static writeWithBackup(filename, content) {
         if (!FileServices.fileExists(filename)) {
             // if the file does not exist yet, just do a normal write operation
-            return writeFile(filename, content)
+            return FileServices.writeFile(filename, content)
         }
 
         // prepare the backup folder
