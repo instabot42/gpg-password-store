@@ -21,8 +21,13 @@ async function inputFieldGeneric(opts) {
         term.inputField(inputOptions, (error, input) => {
             term.grabInput(false)
             term('\n')
+
             if (error) {
                 return reject(error)
+            }
+
+            if (input === undefined) {
+                return reject(new Error('aborted...'))
             }
 
             return resolve(input)
@@ -59,17 +64,10 @@ export async function tryAutocomplete(inputStr, all) {
     return autoCompleteSorted(inputStr, all)
 }
 
-export async function createEntry() {
-    // Find all possible entries
-    const all = []
-
-    function autoComplete(inputStr) {
-        return autoCompleteSorted(inputStr, all)
-    }
-
+export async function createEntry(defaultEntry = '') {
     return inputFieldGeneric({
-        autoComplete,
-        autoCompleteHint: true,
+        default: defaultEntry,
+        cancelable: true,
     })
 }
 
@@ -87,8 +85,12 @@ export async function findEntry(defaultEntry, all) {
     })
 }
 
+export async function filename(defaultFilename = '') {
+    return createEntry(defaultFilename)
+}
+
 export async function username() {
-    return inputFieldGeneric({})
+    return inputFieldGeneric({ cancelable: true })
 }
 
 export async function text() {
@@ -100,6 +102,7 @@ export async function password(words = 4, maxWordLen = 7, joinText = '.') {
         // generate a random password when auto-complete is used
         autoComplete: (input) => passwordGen(words, maxWordLen, joinText),
         autoCompleteHint: true,
+        cancelable: true,
     })
 }
 

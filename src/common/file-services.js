@@ -23,15 +23,23 @@ export default class FileServices {
         return path.resolve(filePath)
     }
 
-    static fileExists(filename) {
+    static filenameFromPath(fullpath) {
+        return path.basename(fullpath)
+    }
+
+    static fullPathExists(fullpath) {
         try {
-            fs.readFileSync(`${baseDir}${filename}`)
+            fs.readFileSync(fullpath)
             return true
         } catch (err) {
             // does not exist, or some of ther error (permission)
         }
 
         return false
+    }
+
+    static fileExists(filename) {
+        return FileServices.fullPathExists(`${baseDir}${filename}`)
     }
 
     static deleteFile(filename) {
@@ -60,8 +68,30 @@ export default class FileServices {
         return path.sep
     }
 
+    static writeFileFullPathWithRefCount(fullpath, content) {
+        let refCount = 0
+        let name = fullpath
+        const maxTries = 40
+        while (refCount < maxTries && FileServices.fullPathExists(name)) {
+            refCount += 1
+            name = `${fullpath}.${refCount}`
+        }
+
+        if (refCount >= maxTries) {
+            throw new Error(`Unable to write to ${fullpath}. File exists already.`)
+        }
+
+        fs.writeFileSync(name, content)
+
+        return name
+    }
+
     static writeFile(filename, content) {
         return fs.writeFileSync(`${baseDir}${filename}`, content)
+    }
+
+    static readFileRaw(fullPath) {
+        return fs.readFileSync(fullPath)
     }
 
     static readFile(filename) {

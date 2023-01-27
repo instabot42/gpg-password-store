@@ -72,6 +72,12 @@ export default class Gpg {
         const response = await executeGPG(content, options)
 
         // return the clear text message
-        return response.msg.toString()
+        return response.msg
+    }
+
+    static async decryptToString(content) {
+        const buffer = await Gpg.decrypt(content)
+
+        return buffer.toString()
     }
 }

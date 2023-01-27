@@ -1,6 +1,6 @@
 import terminal from 'terminal-kit'
 import { copyToClipboard } from '../common/clip.js'
-import { listItems } from '../common/input.js'
+import { listItems, filename } from '../common/input.js'
 import findRecordFromTitle from '../common/find-record.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
@@ -8,6 +8,11 @@ import Gpg from '../common/gpg.js'
 
 const term = terminal.terminal
 
+/**
+ *
+ * @param {*} content
+ * @returns
+ */
 function extractItems(content) {
     // Extract the first line
     const lines = content.split('\n')
@@ -28,12 +33,40 @@ function extractItems(content) {
     return items
 }
 
+/**
+ *
+ * @param {*} db
+ * @param {*} id
+ * @param {*} defaultName
+ */
+async function restoreFile(db, id, defaultName) {
+    term.brightGreen('Restore file to: ')
+    const name = await filename(`./${defaultName}`)
+    const fullpath = FileServices.resolvePath(name)
+
+    const content = await db.getBinary(id)
+
+    const finalName = FileServices.writeFileFullPathWithRefCount(fullpath, content)
+    term.brightYellow(`Wrote content to ${finalName}\n`)
+}
+
+/**
+ *
+ * @param {*} defaultTitle
+ * @param {*} options
+ * @returns
+ */
 export default async function showCommand(defaultTitle, options) {
     // See if the title given is a match
     const db = new Database(FileServices, Gpg)
     const id = await findRecordFromTitle(db, defaultTitle)
 
     // fetch the content
+    const filename = await db.idToFilename(id)
+    if (filename !== null) {
+        return restoreFile(db, id, filename)
+    }
+
     const content = await db.get(id)
     const FullTitle = await db.idToTitle(id)
     term.brightYellow(`${FullTitle}\n`)

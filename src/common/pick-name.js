@@ -3,13 +3,13 @@ import { createEntry } from '../common/input.js'
 
 const term = terminal.terminal
 
-export default async function pickName(db) {
+export default async function pickName(db, defaultEntry = '') {
     // Pick a name that has not been used
-    let entryName = ''
+    let entryName = defaultEntry
     let id = true
     while (id !== null) {
         term.brightGreen('Choose a name for the record: ')
-        entryName = await createEntry()
+        entryName = await createEntry(entryName)
 
         if (entryName === '') {
             throw new Error('No record name. Cancelling...')

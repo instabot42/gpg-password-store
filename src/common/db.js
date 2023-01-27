@@ -87,7 +87,7 @@ export default class Database {
         term.dim('Decrypting db...\n')
 
         const dbEncrypted = this.fs.readFile(dbFilename)
-        const dbJson = await this.gpg.decrypt(dbEncrypted)
+        const dbJson = await this.gpg.decryptToString(dbEncrypted)
 
         this.validateOrFail(JSON.parse(dbJson))
         this.loaded = true
@@ -242,7 +242,7 @@ export default class Database {
      * @param {*} content
      * @returns id of the new entry
      */
-    async insert(title, content) {
+    async insert(title, content, filename = null) {
         await this.load()
 
         // generate new id
@@ -256,7 +256,14 @@ export default class Database {
 
         // insert entry into db
         const now = Date.now()
-        this.db.passwords.push({ id, title, createdAt: now, accessedAt: now, modifiedAt: now })
+        this.db.passwords.push({
+            id,
+            title,
+            filename,
+            createdAt: now,
+            accessedAt: now,
+            modifiedAt: now,
+        })
 
         // save db
         await this.save()
@@ -271,6 +278,16 @@ export default class Database {
      * @returns string
      */
     async get(id) {
+        const encrypted = await this.getEncryptedContent(id)
+        return this.gpg.decryptToString(encrypted)
+    }
+
+    async getBinary(id) {
+        const encrypted = await this.getEncryptedContent(id)
+        return this.gpg.decrypt(encrypted)
+    }
+
+    async getEncryptedContent(id) {
         await this.load()
 
         // look up the id in the db
@@ -290,8 +307,28 @@ export default class Database {
         term.dim('Decrypting record...\n')
 
         // get the contents of id (decrypted)
-        const encrypted = this.fs.readFile(id)
-        return this.gpg.decrypt(encrypted)
+        return this.fs.readFile(id)
+    }
+
+    /**
+     * Is this record a file?
+     * @param {*} id
+     * @returns
+     */
+    async idToFilename(id) {
+        await this.load()
+
+        // look up the id in the db
+        const i = this.db.passwords.findIndex((p) => p.id === id)
+        if (i === -1) {
+            return null
+        }
+
+        if (!this.db.passwords[i].filename) {
+            return null
+        }
+
+        return this.db.passwords[i].filename
     }
 
     /**
