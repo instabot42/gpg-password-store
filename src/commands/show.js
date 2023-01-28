@@ -61,6 +61,10 @@ export default async function showCommand(defaultTitle, options) {
     const db = new Database(FileServices, Gpg)
     const id = await findRecordFromTitle(db, defaultTitle)
 
+    // Find the title and show that
+    const FullTitle = await db.idToTitle(id)
+    term.brightYellow(`${FullTitle}\n`)
+
     // fetch the content
     const filename = await db.idToFilename(id)
     if (filename !== null) {
@@ -68,8 +72,6 @@ export default async function showCommand(defaultTitle, options) {
     }
 
     const content = await db.get(id)
-    const FullTitle = await db.idToTitle(id)
-    term.brightYellow(`${FullTitle}\n`)
 
     // Show it
     if (options.showAll) {
