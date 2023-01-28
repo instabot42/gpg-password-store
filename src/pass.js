@@ -8,6 +8,7 @@ import initCommand from './commands/init.js'
 import editCommand from './commands/edit.js'
 import renameCommand from './commands/rename.js'
 import insertCommand from './commands/insert.js'
+import insertFileCommand from './commands/file.js'
 import deleteCommand from './commands/delete.js'
 import generatePasswordCommand from './commands/generate-password.js'
 import listCommand from './commands/list.js'
@@ -142,6 +143,13 @@ program
     .description('Insert a new password into the DB')
     .action(async (options) => insertCommand({ ...program.opts(), ...options }))
 
+// Insert a file
+program
+    .command('file')
+    .argument('filename', 'the path of the file to store')
+    .description('Store a file in the encrypted data store')
+    .action(async (filename) => insertFileCommand(filename, { ...program.opts() }))
+
 // The show command
 program
     .command('get', { isDefault: true })
@@ -161,7 +169,7 @@ program
     .description('Edit an existing entry')
     .action(async (entryName) => editCommand(entryName, program.opts()))
 
-// The edit command
+// The rename command
 program
     .command('rename')
     .argument('[entryName]', 'the name / part name of the entry to rename', '')
@@ -208,11 +216,12 @@ program
     .command('list')
     .alias('ls')
     .alias('l')
+    .argument('[search]', 'Limit the result to only those including the search term', '')
     .option('-c, --sort-created', 'Sort by creation date (oldest first)')
     .option('-m, --sort-modified', 'Sort by modified date (oldest first)')
     .option('-a, --sort-accessed', 'Sort by last accessed date (oldest first)')
     .description('List all the passwords')
-    .action(async (options) => listCommand({ ...program.opts(), ...options }))
+    .action(async (search, options) => listCommand(search, { ...program.opts(), ...options }))
 
 // Files
 // pass file filename
