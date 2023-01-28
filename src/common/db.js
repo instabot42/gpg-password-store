@@ -240,6 +240,7 @@ export default class Database {
      * Saves the DB back to disk (also encrypted)
      * @param {*} title
      * @param {*} content
+     * @param {*} filename
      * @returns id of the new entry
      */
     async insert(title, content, filename = null) {

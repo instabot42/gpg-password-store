@@ -216,11 +216,12 @@ program
     .command('list')
     .alias('ls')
     .alias('l')
+    .argument('[search]', 'Limit the result to only those including the search term', '')
     .option('-c, --sort-created', 'Sort by creation date (oldest first)')
     .option('-m, --sort-modified', 'Sort by modified date (oldest first)')
     .option('-a, --sort-accessed', 'Sort by last accessed date (oldest first)')
     .description('List all the passwords')
-    .action(async (options) => listCommand({ ...program.opts(), ...options }))
+    .action(async (search, options) => listCommand(search, { ...program.opts(), ...options }))
 
 // Files
 // pass file filename

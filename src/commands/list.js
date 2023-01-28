@@ -33,20 +33,30 @@ function sortRecords(records, options) {
     }
 }
 
-export default async function listCommand(options) {
+export default async function listCommand(search, options) {
     term.brightGreen('Password Store\n')
 
     const db = new Database(FileServices, Gpg)
     const records = await db.all()
-    const all = sortRecords(records, options)
 
+    // filter the results to anything provided
+    const lowerStr = search.toLowerCase()
+    let matches = records.filter((w) => w.title.toLowerCase().includes(lowerStr))
+    if (matches.length === 0) {
+        matches = records
+    }
+
+    // Sort the results
+    const sorted = sortRecords(matches, options)
+
+    // Show the results
     const keyCount = await db.getKeyCount()
     const keys = await db.getKeyIds()
-    term.dim(`Found ${all.length} entries, encrypted with ${keyCount} GPG key.\n`)
+    term.dim(`Found ${sorted.length} matching entries, encrypted with ${keyCount} GPG key.\n`)
     term.dim(`Keys: ${keys.join(', ')}\n`)
-    if (all.length === 0) {
+    if (sorted.length === 0) {
         term.dim.white('  empty\n')
     } else {
-        all.forEach((entry) => term.brightCyan(`${entry.title}\n`))
+        sorted.forEach((entry) => term.brightCyan(`${entry.title}\n`))
     }
 }

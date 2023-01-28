@@ -113,9 +113,10 @@ The new password will be copied to the clipboard (but only for 15 seconds)
 
 #### List all your passwords
 
-`pass ls`
+`pass ls [search]`
 
-shows a list of all the passwords in your store (just the names you gave them, not the actual passwords)
+Shows a list of all the passwords in your store (just the names you gave them, not the actual passwords).
+If you pass an optional search term, only record names that contain the text in their title will be shown
 
 #### Find and show a password entry
 
@@ -128,6 +129,9 @@ Once you have chosen a password, all the values in the entry will be offered. pi
 Choose the 'Show Full Record' to see the entire entry, including any notes you have added to the entry. You can also add the -s option to the command line to show the entry right away.
 
 ESC to exit, and ESC again to skip the clipboard clearing timeout.
+
+Note that if the entry was added using `pass file`, to add a file to the store, then you will be prompted for a filename to restore the file to (defaults to the original files name, into the current directory).
+Once a filename is chosen, the entry is decrypted and writen to the filename you gave.
 
 #### Edit an existing entry
 
@@ -146,6 +150,12 @@ Choose the entry to delete, and complete the endless 'are you sure' steps.
 `pass generate-password` or just `pass g`
 
 It will not be stored anywhere.
+
+#### Add a file to the DB
+
+`pass file filename`
+
+Give a name for the entry (defaults to the filename). The file will be copied into the password store, encrypted. The original file will be left unmodified. The new record in the password store will be listed using the name you gave the entry. Use `pass get` to decrypt and restore the file again.
 
 ### Format
 
@@ -182,6 +192,7 @@ The DB is ultra simple. It is a JSON encoded version of the following structure.
     passwords: [{
         id: 'random id',
         title: 'title of record',
+        filename: 'null or the original name of the file - optional'
         createdAt: timestamp,
         accessedAt: timestamp,
         modifiedAt: timestamp,
