@@ -1,11 +1,11 @@
-import sodium from 'sodium-native'
+import crypto from 'node:crypto'
 import wordlist from './wordlist.js'
 
 /**
  * Random 32 bit int
  */
 function randInt() {
-    return sodium.randombytes_random()
+    return crypto.randomInt(2 ** 38)
 }
 
 /**

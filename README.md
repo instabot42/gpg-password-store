@@ -10,11 +10,14 @@ Note, I built this just for fun - it's not audited and it's not my job to mainta
 -   No background tasks - it only runs when you run it from the command line
 -   Each password stored in a separate encrypted file. A single corrupt file doesn't take you down.
 -   Trusted, secure GPG encryption (needs GPG command line tools installed)
+-   Add files to your password store (encrypted) for things like keys, passport scans etc
+-   TOTP Support (Google Authenticator style 2FA time base one time passwords)
 -   Leaves cloud backup up to you.
 -   git friendly. Encrypted data uses ascii armour format. Make your password folder a git repo to keep a history / backups and push for off-site redundancy (if you want)
 -   You can decrypt and access your data using the normal gpg command line tools if you need to (assuming your have your gpg keys)
 -   auto-completion to make hunting down your passwords simpler
--   configurable random password generation (using libsodium for battle tested random number generation)
+-   configurable random password generation
+-   Can be used with your YubiKeys, so access is only possible with the hardware token present.
 
 Don't forget to backup your GPG key pairs. Without them you won't be able to ever recover your passwords.
 
@@ -180,6 +183,16 @@ Username: username you entered
 Password: password you created
 
 any notes you added here
+```
+
+### TOTP token Support
+
+Add a value to a record with a label that contains TOTP and that value will copy the current time based one-time password to your clipboard.
+For example, in the record, to add the secret 2FA key of `12345678901234567890` as follows. When presented, this row will copy the current 6 digit value into the clipboard for you.
+
+```
+Add a 2FA token to this record...
+TOTP: 12345678901234567890
 ```
 
 ### DB Format

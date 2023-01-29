@@ -5,6 +5,7 @@ import findRecordFromTitle from '../common/find-record.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
 import Gpg from '../common/gpg.js'
+import generateOTP from '../common/totp.js'
 
 const term = terminal.terminal
 
@@ -94,7 +95,12 @@ export default async function showCommand(defaultTitle, options) {
         // mask password on-screen
         const mappedItems = items.map((i) => {
             const n = i.name.toLowerCase()
-            if (n.includes('pass') || n.includes('2fa')) {
+            if (
+                n.includes('pass') ||
+                n.includes('2fa') ||
+                n.includes('pin') ||
+                n.includes('totp')
+            ) {
                 return `${i.name} => ************`
             }
 
@@ -110,16 +116,31 @@ export default async function showCommand(defaultTitle, options) {
         if (result?.canceled) {
             keepGoing = false
         } else {
-            if (result.selectedIndex > items.length - 1) {
+            const index = result.selectedIndex
+            if (index > items.length - 1) {
                 selectedIndex = 0
                 term.noFormat(`${content}\n`)
             } else {
-                const value = items[result.selectedIndex].value
+                const name = items[index].name
+                let value = items[index].value
+
+                // one time password gen?
+                if (name.toLowerCase().includes('totp')) {
+                    value = generateOTP(value, Date.now())
+                    term.brightCyan(`\nOne Time Password generated to clipboard:\n`)
+                    term.brightYellow(`${value.slice(0, 3)} ${value.slice(3)}\n`)
+
+                    const time = Math.floor(Date.now() / 1000)
+                    const age = time - Math.floor(time / 30) * 30
+                    term.dim(`Valid for ${30 - age} seconds\n`)
+                }
+
+                // copy to clipboard
                 copyToClipboard(value)
-                term.brightCyan(`\n>>'${items[result.selectedIndex].name}' copied<<\n\n`)
+                term.brightCyan(`\n>>'${name}' copied<<\n\n`)
 
                 // default to the next entry
-                selectedIndex = result.selectedIndex + 1
+                selectedIndex = index + 1
             }
         }
     }
