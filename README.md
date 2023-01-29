@@ -37,7 +37,7 @@ What you'll need...
 # gpg command line
 sudo apt-get install gnupg
 
-# A gui for Ubuntu if you like...
+# A gui for Ubuntu if you like (optional)...
 sudo apt-get install kgpg
 ```
 
@@ -101,6 +101,9 @@ The command expects an argument that is the name / keyID of the GPG keys you wou
 You can provide a list of keys, separated by commas
 
 Usefully, if you need to migrate your password store to a new set of keys, or add a new key, just use init again with the new list of keys.
+All existing entries will be decrypted and re-encrypted using the new set of keys. This can take a while if you have a lot of passwords.
+Note: if you are using a YubiKey and have configured to require a touch to decrypt, you may need to keep touching the yubi key for each
+entry, depending on your cache settings.
 
 Note that key names that contain spaces will need to be quoted.
 
@@ -187,7 +190,7 @@ any notes you added here
 
 ### TOTP token Support
 
-Add a value to a record with a label that contains TOTP and that value will copy the current time based one-time password to your clipboard.
+Add a value to a record with a label that contains 'TOTP' and that value will copy the current time based one-time password to your clipboard.
 For example, in the record, to add the secret 2FA key of `12345678901234567890` as follows. When presented, this row will copy the current 6 digit value into the clipboard for you.
 
 ```
@@ -196,6 +199,8 @@ TOTP: 12345678901234567890
 ```
 
 ### DB Format
+
+The password store uses a simple DB to keep track of things. This file is also stored encrypted, the same as all the password records. It's main purpose is to provide a mapping from the name you gave each password (eg 'Amazon.com') to the file that contains the related password information. The database helps ensure that the list of accounts you are tracking remains secret, as the filenames for each record is just a random UUID.
 
 The DB is ultra simple. It is a JSON encoded version of the following structure...
 
@@ -218,9 +223,10 @@ The DB is ultra simple. It is a JSON encoded version of the following structure.
 }
 ```
 
-The json content is then encrypted and the encrypted data stored in a file called `.db` in your gpg-store folder.
+The json content is then encrypted and the encrypted data stored in a file called `db` in your gpg-store folder. Again, you can simply
+manually decrypt this file should you need to using the normal GPG command line tools.
 
-Additionally, every time the db is updated, the previous version is moved into the `bak` folder with the current timestamp added to the filename, and the updated .db file is written in it's place. This ensures a full history of the db is available. The contents of the `bak` folder are not used, so old db backups can be deleted if you don't need them.
+Additionally, every time the db is updated, the previous version is moved into the `bak` folder with the current timestamp added to the filename, and the updated `db` file is written in it's place. This ensures a long history of the db is available. The contents of the `bak` folder are not used, so old db backups can be deleted if you don't need them.
 
 ### Other Useful info
 
@@ -228,9 +234,7 @@ Every password entry you create will result in a new text file in your password 
 You can access this data using pass, but you can also access it using the regular GPG tools - it is just a regular 'armor' encoded GPG encrypted message.
 This means you do not need this app in order to read and access your password data.
 
-In order to protect your data though, the filenames of all these separate password entries are just random (UUID's if you care). GPG Password Store keeps one other file to
-keep track of these random files. `.db` is a simple database that contains a list of your passwords and the name of the file each password entry is stored in.
-This db file is also encrypted using your keys, but again, you can decrypt it yourself with the GPG tools manually. It is just a simple JSON file.
+In order to protect your data though, the filenames of all these separate password entries are just random (UUID's if you care).
 
 ### Using with git
 
@@ -248,7 +252,7 @@ As everything is just text files inside this folder, git can track your changes 
 GPG Password Store does nothing about cloud storage and does not connect to the internet - you can use it on devices with no internet access, without any issues at all.
 If you want to keep a backup of your password data off-site though, you are free to use any service you have confidence in. GPG uses very secure encryption, and if you manage and protect your GPG private keys correctly, it should, in theory, be safe to store your encrypted password data in your iCloud / Dropbox / Google Drive folder. If you are also using git, you could also just push the repo to a remote server too. However, you'll have to make your own choices about this, depending on how confident you are in your key storage and how safe you feel the service you use is. GPG Password Store will only ever write encrypted data into the folder.
 
-It's worth knowing that there is nothing clever going on though. You can simply copy the files out of the folder onto anything you need to. Copy them to a USB stick, a NAS Drive, S3, whatever. Restoring is as simple as copying them back again. **Make sure you get the hidden .db file too.**
+It's worth knowing that there is nothing clever going on though. You can simply copy the files out of the folder onto anything you need to. Copy them to a USB stick, a NAS Drive, S3, whatever. Restoring is as simple as copying them back again. **Make sure you get the db file too.**
 
 ### My keys are expiring soon - what do I do....?
 
