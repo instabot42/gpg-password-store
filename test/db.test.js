@@ -33,7 +33,7 @@ describe('Database', () => {
         }
 
         const gpg = {
-            decrypt: sinon
+            decryptToString: sinon
                 .stub()
                 .returns('{"version":3,"passwords":[], "gpgIds": [], "settings":[]}'),
         }
@@ -55,7 +55,7 @@ describe('Database', () => {
             settings: [{ name: 'test', value: '42' }],
         }
         const gpg = {
-            decrypt: sinon.stub().returns(JSON.stringify(dbcontent)),
+            decryptToString: sinon.stub().returns(JSON.stringify(dbcontent)),
         }
 
         const db = new Database(fs, gpg)
@@ -84,7 +84,7 @@ describe('Database', () => {
         }
 
         const gpg = {
-            decrypt: sinon.stub().returns(JSON.stringify(dbcontent)),
+            decryptToString: sinon.stub().returns(JSON.stringify(dbcontent)),
             encrypt: sinon.stub().returns(''),
         }
 
