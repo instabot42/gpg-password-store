@@ -14,7 +14,6 @@
     "commander": "^9.4.0",
     "external-editor": "^3.1.0",
     "terminal-kit": "^2.6.0",
-    "thirty-two": "github:instabot42/thirty-two",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
