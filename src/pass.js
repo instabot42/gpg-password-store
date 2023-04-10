@@ -12,6 +12,7 @@ import insertFileCommand from './commands/file.js'
 import deleteCommand from './commands/delete.js'
 import generatePasswordCommand from './commands/generate-password.js'
 import listCommand from './commands/list.js'
+import { styles } from './input/terminal.js'
 
 const term = terminal.terminal
 const program = new Command()
@@ -89,8 +90,8 @@ function clipboardProgressBar() {
 // Declare the program
 program
     .name('pass')
-    .description('A simple password manager / store that leans on GPG')
-    .version('1.6.1')
+    .description(styles.warning('A simple password manager / store that leans on GPG'))
+    .version(styles.warning('1.6.1'))
     .option('-k, --skip-clipboard', 'skip the clipboard')
     .hook('preAction', (thisCommand, actionCommand) => {
         const opts = program.opts()
@@ -111,7 +112,7 @@ program
         'name / ID of the GPG keypairs that will be used for encryption/decryption.'
     )
     .description(
-        'Create the target folder that will be used to store everything, and define which GPG keys will be used for encryption / decryption. To encrypt to many key pairs, comma separate them'
+        styles.info('Create the target folder that will be used to store everything, and define which GPG keys will be used for encryption / decryption. To encrypt to many key pairs, comma separate them')
     )
     .action(async (gpgKeyPair) => initCommand(gpgKeyPair, program.opts()))
 
@@ -140,14 +141,14 @@ program
         'use a random special character between each pair of words (overrides -j',
         defaultRandomJoin
     )
-    .description('Insert a new password into the DB')
+    .description(styles.info('Insert a new password into the DB'))
     .action(async (options) => insertCommand({ ...program.opts(), ...options }))
 
 // Insert a file
 program
     .command('file')
     .argument('filename', 'the path of the file to store')
-    .description('Store a file in the encrypted data store')
+    .description(styles.info('Store a file in the encrypted data store'))
     .action(async (filename) => insertFileCommand(filename, { ...program.opts() }))
 
 // The show command
@@ -158,7 +159,7 @@ program
     .alias('g')
     .argument('[entryName]', 'the name of the entry to lookup', '')
     .option('-s, --show-all', 'Output the whole entry to the terminal', false)
-    .description('Search for and show password details')
+    .description(styles.info('Search for and show password details'))
     .action(async (entryName, options) => showCommand(entryName, { ...program.opts(), ...options }))
 
 // The edit command
@@ -166,14 +167,14 @@ program
     .command('edit')
     .alias('e')
     .argument('[entryName]', 'the name of the entry to lookup', '')
-    .description('Edit an existing entry')
+    .description(styles.info('Edit an existing entry'))
     .action(async (entryName) => editCommand(entryName, program.opts()))
 
 // The rename command
 program
     .command('rename')
     .argument('[entryName]', 'the name / part name of the entry to rename', '')
-    .description('Change the name of an entry')
+    .description(styles.info('Change the name of an entry'))
     .action(async (entryName) => renameCommand(entryName, program.opts()))
 
 // The Delete command
@@ -181,7 +182,7 @@ program
     .command('delete')
     .alias('rm')
     .argument('[entryName]', 'the name of the entry to lookup', '')
-    .description('Delete an item from the store')
+    .description(styles.info('Delete an item from the store'))
     .action(async (entryName) => deleteCommand(entryName, program.opts()))
 
 // The Generate Password command
@@ -208,7 +209,7 @@ program
         'use a random special character between each pair of words (overrides -j',
         defaultRandomJoin
     )
-    .description('Generate a random password, show it and copy it to the clipboard')
+    .description(styles.info('Generate a random password, show it and copy it to the clipboard'))
     .action(async (options) => generatePasswordCommand({ ...program.opts(), ...options }))
 
 // The List all passwords command
@@ -220,14 +221,9 @@ program
     .option('-c, --sort-created', 'Sort by creation date (oldest first)')
     .option('-m, --sort-modified', 'Sort by modified date (oldest first)')
     .option('-a, --sort-accessed', 'Sort by last accessed date (oldest first)')
-    .description('List all the passwords')
+    .description(styles.info('List all the passwords'))
     .action(async (search, options) => listCommand(search, { ...program.opts(), ...options }))
 
-// Files
-// pass file filename
-// Would read the file and write an encrypted copy of it into the password store
-// The entry would be marked as a file and the original filename remembered
-// When you get an entry and we see if it is a file, it should write it to the 'downloads' folder
 
 // pass setting downloads path
 // sets the default downloads folder where files will be restored to

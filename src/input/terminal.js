@@ -9,10 +9,11 @@ c.theme({
     warning: c.yellowBright,
     danger: c.bold.redBright,
 
+    placeholder: c.cyan,
     strong: c.bold,
     dark: c.dim.gray,
     disabled: c.gray,
-    em: c.italic,
+    em: c.italic.blueBright,
     underline: c.underline,
 })
 
@@ -68,5 +69,5 @@ export class Terminal {
     }
 }
 
-const  term = new Terminal()
+export const term = new Terminal()
 export default term
