@@ -1,6 +1,5 @@
-import terminal from 'terminal-kit'
 import { findEntry, tryAutocomplete } from '../common/input.js'
-const term = terminal.terminal
+import term from '../input/terminal.js'
 
 export default async function findRecordFromTitle(db, defaultTitle) {
     // See if we get an exact match
@@ -23,7 +22,7 @@ export default async function findRecordFromTitle(db, defaultTitle) {
     }
 
     // no match yet, so ask the user
-    term.brightGreen('Search (tab for autocomplete):\n')
+    term.heading('Search (tab for autocomplete):\n')
 
     const SearchedTitle = await findEntry(defaultTitle, all)
     id = await db.titleToId(SearchedTitle)

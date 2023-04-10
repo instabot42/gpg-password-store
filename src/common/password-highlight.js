@@ -1,5 +1,4 @@
-import terminal from 'terminal-kit'
-const term = terminal.terminal
+import term from '../input/terminal.js'
 
 /**
  * True if str matches the regex given
@@ -18,12 +17,12 @@ export function passwordColoured(p) {
     for (let i = 0; i < p.length; i += 1) {
         const char = p[i]
         if (match(/[a-z]/i, char)) {
-            term.brightWhite(char)
+            term.primary(char)
         } else if (match(/[0-9]/i, char)) {
-            term.brightYellow(char)
+            term.warning(char)
         } else {
-            term.brightCyan(char)
+            term.bright(char)
         }
     }
-    term('\n')
+    term.write('\n')
 }

@@ -1,11 +1,9 @@
-import terminal from 'terminal-kit'
 import { editor } from '../common/input.js'
 import findRecordFromTitle from '../common/find-record.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
 import Gpg from '../common/gpg.js'
-
-const term = terminal.terminal
+import term from '../input/terminal.js'
 
 export default async function editCommand(defaultName, options) {
     // See if the title given is a match
@@ -19,10 +17,10 @@ export default async function editCommand(defaultName, options) {
     // edit it
     const updated = await editor(content)
     if (updated === content) {
-        term.brightCyan('No changes made.\n')
+        term.result('No changes made.\n')
     } else {
         // encrypt it and write it back
         await db.update(id, updated)
-        term.brightCyan(`${FullTitle} updated\n`)
+        term.result(`${FullTitle} updated\n`)
     }
 }

@@ -1,12 +1,10 @@
-import terminal from 'terminal-kit'
 import { copyToClipboard } from '../common/clip.js'
 import * as input from '../common/input.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
 import pickName from '../common/pick-name.js'
 import Gpg from '../common/gpg.js'
-
-const term = terminal.terminal
+import term from '../input/terminal.js'
 
 export default async function insertCommand(options) {
     const db = new Database(FileServices, Gpg)
@@ -14,11 +12,11 @@ export default async function insertCommand(options) {
     // Pick a unique name for the record
     const entryName = await pickName(db)
 
-    term.brightGreen('Username: ')
+    term.heading('Username: ')
     const username = await input.username()
 
     // ask for a password, or generate one
-    term.brightGreen('\nPassword (tab to generate one): ')
+    term.heading('\nPassword (tab to generate one): ')
     const password = await input.password(
         options.wordCount,
         options.maxWordLen,
@@ -26,7 +24,7 @@ export default async function insertCommand(options) {
     )
 
     // Ask about extra notes
-    term.brightGreen('\nDo you want to add notes (y/N)\n')
+    term.heading('\nDo you want to add notes (y/N)\n')
     const wantNotes = await input.yesNo()
     const notes = wantNotes ? await input.editor('') : ''
 
@@ -34,12 +32,12 @@ export default async function insertCommand(options) {
     const fullEntry = `${entryName}\n\nUsername: ${username}\nPassword: ${password}\n\n${notes}`
 
     // encrypt it
-    term.dim.white('\nWriting...\n')
+    term.muted('\nWriting...\n')
     await db.insert(entryName, fullEntry)
-    term.dim.white('Encrypted and saved\n\n')
-    term.brightCyan(fullEntry)
+    term.muted('Encrypted and saved\n\n')
+    term.write(fullEntry)
 
     // clipboard
-    term.brightCyan(`Password copied to clipboard\n`)
+    term.result(`Password copied to clipboard\n`)
     copyToClipboard(password)
 }

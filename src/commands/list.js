@@ -1,9 +1,8 @@
-import terminal from 'terminal-kit'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
 import Gpg from '../common/gpg.js'
+import term from '../input/terminal.js'
 
-const term = terminal.terminal
 
 function sortRecords(records, options) {
     if (options.sortAccessed) {
@@ -34,7 +33,7 @@ function sortRecords(records, options) {
 }
 
 export default async function listCommand(search, options) {
-    term.brightGreen('Password Store\n')
+    term.heading('Password Store\n')
 
     const db = new Database(FileServices, Gpg)
     const records = await db.all()
@@ -52,11 +51,11 @@ export default async function listCommand(search, options) {
     // Show the results
     const keyCount = await db.getKeyCount()
     const keys = await db.getKeyIds()
-    term.dim(`Found ${sorted.length} matching entries, encrypted with ${keyCount} GPG key.\n`)
-    term.dim(`Keys: ${keys.join(', ')}\n`)
+    term.muted(`Found ${sorted.length} matching entries, encrypted with ${keyCount} GPG key.\n`)
+    term.muted(`Keys: ${keys.join(', ')}\n`)
     if (sorted.length === 0) {
-        term.dim.white('  empty\n')
+        term.result('  empty\n')
     } else {
-        sorted.forEach((entry) => term.brightCyan(`${entry.title}\n`))
+        sorted.forEach((entry) => term.result(`${entry.title}\n`))
     }
 }
