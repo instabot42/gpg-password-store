@@ -1,6 +1,7 @@
 import { copyToClipboard } from '../common/clip.js'
-import { listItems, filename } from '../common/input.js'
-import findRecordFromTitle from '../common/find-record.js'
+import { filename } from '../common/input.js'
+import findRecordFromTitle from '../input/find-record.js'
+import pickField from '../input/pick-field.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
 import Gpg from '../common/gpg.js'
@@ -87,59 +88,43 @@ export default async function showCommand(defaultTitle, options) {
     let keepGoing = true
     let selectedIndex = 0
     while (keepGoing) {
-        // show the list of items to copy to the clipboard
-        term.heading('Copy fields to clipboard? (ESC to abort)')
-
-        // mask password on-screen
-        const mappedItems = items.map((i) => {
-            const n = i.name.toLowerCase()
-            if (
-                n.includes('pass') ||
-                n.includes('2fa') ||
-                n.includes('pin') ||
-                n.includes('totp')
-            ) {
-                return `${i.name} => ************`
-            }
-
-            return `${i.name} => ${i.value}`
-        })
-
-        // add an entry to show everything
-        mappedItems.push('Show Full Record')
-
-        const result = await listItems(mappedItems, selectedIndex)
+        // const result = await listItems(mappedItems, selectedIndex)
+        const index = await pickField(items, selectedIndex)
+        if (index === null) {
+            return
+        }
 
         // copy it and go around again, or cancel
-        if (result?.canceled) {
-            keepGoing = false
+        if (index > items.length - 1) {
+            selectedIndex = 0
+            term.write(`${content}\n`)
         } else {
-            const index = result.selectedIndex
-            if (index > items.length - 1) {
-                selectedIndex = 0
-                term.write(`${content}\n`)
-            } else {
-                const name = items[index].name
-                let value = items[index].value
+            const name = items[index].name
+            const value = convertValue(name, items[index].value)
 
-                // one time password gen?
-                if (name.toLowerCase().includes('totp')) {
-                    value = generateOTP(value, Date.now())
-                    term.info(`\nOne Time Password generated to clipboard:\n`)
-                    term.result(`${value.slice(0, 3)} ${value.slice(3)}\n`)
+            // copy to clipboard
+            copyToClipboard(value)
+            term.result(`\n>>'${name}' copied<<\n\n`)
 
-                    const time = Math.floor(Date.now() / 1000)
-                    const age = time - Math.floor(time / 30) * 30
-                    term.muted(`Valid for ${30 - age} seconds\n`)
-                }
-
-                // copy to clipboard
-                copyToClipboard(value)
-                term.result(`\n>>'${name}' copied<<\n\n`)
-
-                // default to the next entry
-                selectedIndex = index + 1
-            }
+            // default to the next entry
+            selectedIndex = index + 1
         }
     }
+}
+
+function convertValue(name, v) {
+    // one time password gen?
+    if (name.toLowerCase().includes('totp')) {
+        const value = generateOTP(value, Date.now())
+        term.info(`\nOne Time Password generated to clipboard:\n`)
+        term.result(`${value.slice(0, 3)} ${value.slice(3)}\n`)
+
+        const time = Math.floor(Date.now() / 1000)
+        const age = time - Math.floor(time / 30) * 30
+        term.muted(`Valid for ${30 - age} seconds\n`)
+
+        return value
+    }
+
+    return v;
 }

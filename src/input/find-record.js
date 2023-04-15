@@ -1,6 +1,6 @@
 import { tryAutocomplete } from '../common/input.js'
-import { styles } from '../input/terminal.js'
-import AutoCompleteTimeout from '../input/autocomplete-timeout.js'
+import { styles } from './terminal.js'
+import AutoCompleteTimeout from './autocomplete-timeout.js'
 
 export default async function findRecordFromTitle(db, defaultTitle) {
     // See if we get an exact match

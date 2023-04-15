@@ -1,4 +1,4 @@
-import findRecordFromTitle from '../common/find-record.js'
+import findRecordFromTitle from '../input/find-record.js'
 import pickName from '../common/pick-name.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
