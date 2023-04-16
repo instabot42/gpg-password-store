@@ -1,6 +1,6 @@
 import terminal from 'terminal-kit'
 import { edit } from 'external-editor'
-import passwordGen from './password-gen.js'
+import { passwordWordGen } from './password-gen.js'
 
 const term = terminal.terminal
 
@@ -100,7 +100,8 @@ export async function text() {
 export async function password(words = 4, maxWordLen = 7, joinText = '.') {
     return inputFieldGeneric({
         // generate a random password when auto-complete is used
-        autoComplete: (input) => passwordGen(words, maxWordLen, joinText),
+        autoComplete: (input) =>
+            passwordWordGen({ wordCount: words, shortWordsOnly: maxWordLen <= 5, join: joinText }),
         autoCompleteHint: true,
         cancelable: true,
     })

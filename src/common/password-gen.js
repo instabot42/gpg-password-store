@@ -20,10 +20,18 @@ function randLen(len) {
  * Generate a random "join" string to use between words
  */
 function randomJoin() {
-    const special = '.,!@#$%^&*()_-+=;:|'
-    const rndNum = randLen(special.length)
+    return randomChar('.,!@#$%^&*()_-+=;:|')
+}
 
-    return special[rndNum]
+/**
+ * Random Character from the list of possible characters
+ * @param {*} dictionary
+ * @returns
+ */
+function randomChar(dictionary) {
+    const rndNum = randLen(dictionary.length)
+
+    return dictionary[rndNum]
 }
 
 /**
@@ -50,11 +58,14 @@ function numberString() {
  * @param {*} joinStr  String to use to join the words (for a function that returns a string)
  * @returns A new password
  */
-export default function passwordGen(words, maxLen, joinStr) {
+export function passwordWordGen(options) {
     let passwords = []
     let w = 0
     let numberCount = 0
 
+    const words = options.wordCount || 5
+    const joinStr = options.join || '-'
+    const maxLen = options.shortWordsOnly ? 5 : 99
     while (w < words) {
         // try and find another word
         const offset = randLen(wordlist.length)
@@ -65,14 +76,14 @@ export default function passwordGen(words, maxLen, joinStr) {
             w += 1
 
             // Add a number?
-            if (randLen(100) > 70) {
+            if (options.addDigits && randLen(100) > 70) {
                 passwords.push(numberString())
                 numberCount += 1
             }
         }
     }
 
-    if (numberCount === 0) {
+    if (options.addDigits && numberCount === 0) {
         passwords.push(numberString())
     }
 
@@ -80,4 +91,35 @@ export default function passwordGen(words, maxLen, joinStr) {
         (p, w, i) => (i === 0 ? w : `${p}${joinStr === true ? randomJoin() : joinStr}${w}`),
         ''
     )
+}
+
+export function passwordLetterGen(options) {
+    const special = '.,!@#$%^&*()_-+=;:|'
+    let lower = 'abcdefghijklmnopqrstuvwxyz'
+    let digits = '0123456789'
+
+    // remove ambiguous characters?
+    if (!options.ambiguous) {
+        lower = lower.replace(/o|i|l/i, '')
+        digits = digits.replace(/0|1/i, '')
+    }
+
+    // which sets of characters should be used
+
+    // lower case more common...
+    let all = lower + lower
+
+    // add in other options
+    all += options.upper ? lower.toUpperCase() : ''
+    all += options.digits ? digits : ''
+    all += options.special ? special : ''
+
+    let c = options.charCount || 12
+    let str = ''
+    while (c > 0) {
+        str += randomChar(all)
+        c -= 1
+    }
+
+    return str
 }

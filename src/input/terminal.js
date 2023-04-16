@@ -15,6 +15,7 @@ c.theme({
     disabled: c.gray,
     em: c.italic.blueBright,
     underline: c.underline,
+    bright: c.bold.whiteBright
 })
 
 export const styles = c

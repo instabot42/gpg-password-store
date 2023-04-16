@@ -1,5 +1,5 @@
 import findRecordFromTitle from '../input/find-record.js'
-import pickName from '../common/pick-name.js'
+import pickName from '../input/pick-name.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
 import Gpg from '../common/gpg.js'

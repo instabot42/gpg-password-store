@@ -1,4 +1,4 @@
-import term from '../input/terminal.js'
+import { styles } from '../input/terminal.js'
 
 /**
  * True if str matches the regex given
@@ -14,15 +14,20 @@ function match(regex, str) {
  * @param {*} p
  */
 export function passwordColoured(p) {
-    for (let i = 0; i < p.length; i += 1) {
-        const char = p[i]
+    // split into chars in a way that support unicode
+    const chars = [...p]
+
+    // decide how to display each one...
+    let result = ''
+    chars.forEach((char) => {
         if (match(/[a-z]/i, char)) {
-            term.primary(char)
+            result += styles.primary(char)
         } else if (match(/[0-9]/i, char)) {
-            term.warning(char)
+            result += styles.warning(char)
         } else {
-            term.bright(char)
+            result += styles.bright(char)
         }
-    }
-    term.write('\n')
+    })
+
+    return result
 }

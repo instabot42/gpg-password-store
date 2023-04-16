@@ -2,9 +2,10 @@ import { copyToClipboard } from '../common/clip.js'
 import * as input from '../common/input.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
-import pickName from '../common/pick-name.js'
+import pickName from '../input/pick-name.js'
 import Gpg from '../common/gpg.js'
 import term from '../input/terminal.js'
+import password from '../input/password.js'
 
 export default async function insertCommand(options) {
     const db = new Database(FileServices, Gpg)
@@ -16,12 +17,7 @@ export default async function insertCommand(options) {
     const username = await input.username()
 
     // ask for a password, or generate one
-    term.heading('\nPassword (tab to generate one): ')
-    const password = await input.password(
-        options.wordCount,
-        options.maxWordLen,
-        options.randomJoin ? true : options.joinText
-    )
+    const pass = await password()
 
     // Ask about extra notes
     term.heading('\nDo you want to add notes (y/N)\n')
@@ -29,7 +25,7 @@ export default async function insertCommand(options) {
     const notes = wantNotes ? await input.editor('') : ''
 
     // combine all responses into a single doc
-    const fullEntry = `${entryName}\n\nUsername: ${username}\nPassword: ${password}\n\n${notes}`
+    const fullEntry = `${entryName}\n\nUsername: ${username}\nPassword: ${pass}\n\n${notes}`
 
     // encrypt it
     term.muted('\nWriting...\n')
@@ -39,5 +35,5 @@ export default async function insertCommand(options) {
 
     // clipboard
     term.result(`Password copied to clipboard\n`)
-    copyToClipboard(password)
+    copyToClipboard(pass)
 }
