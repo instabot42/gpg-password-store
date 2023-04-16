@@ -1,4 +1,4 @@
-import { styles, term } from './terminal.js'
+import { styles } from './terminal.js'
 import enquirer from 'enquirer'
 import ValueSelect from './select.js'
 import { passwordLetterGen, passwordWordGen } from '../common/password-gen.js'
@@ -31,19 +31,6 @@ export default async function password(forceGenerate) {
         console.log(err)
         throw new Error('Cancelling...')
     }
-
-    // manual entry...
-
-    // generate
-    // words or random
-    // words
-    // number of words
-    // word length
-    // join chars
-    // add numbers
-    // random
-    // length
-    // char mix
 }
 
 async function randomPassword() {
@@ -62,12 +49,6 @@ async function randomPassword() {
  * @returns
  */
 async function randomWordsPassword() {
-    // register the custom select prompt
-    // const enq = new enquirer();
-    // enq.register('valueSelect', ValueSelect);
-    // console.log(enq)
-
-
     // Figure out all the options
     const options = await enquirer.prompt([
         {
@@ -110,9 +91,6 @@ async function randomWordsPassword() {
 
     const r = await join.run()
     options.join = r
-
-
-    console.log(options)
 
     const result = await pickFromPasswordSelection(() => passwordWordGen(options))
     return result
