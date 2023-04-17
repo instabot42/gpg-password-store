@@ -1,4 +1,4 @@
-import { editor } from '../common/input.js'
+import editor from '../input/editor.js'
 import findRecordFromTitle from '../input/find-record.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'

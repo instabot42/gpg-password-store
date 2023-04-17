@@ -1,5 +1,4 @@
 import { copyToClipboard } from '../common/clip.js'
-import { filename } from '../common/input.js'
 import findRecordFromTitle from '../input/find-record.js'
 import pickField from '../input/pick-field.js'
 import Database from '../common/db.js'
@@ -7,6 +6,7 @@ import FileServices from '../common/file-services.js'
 import Gpg from '../common/gpg.js'
 import generateOTP from '../common/totp.js'
 import term from '../input/terminal.js'
+import textPrompt from '../input/text-prompt.js'
 
 /**
  *
@@ -40,8 +40,7 @@ function extractItems(content) {
  * @param {*} defaultName
  */
 async function restoreFile(db, id, defaultName) {
-    term.heading('Restore file to: ')
-    const name = await filename(`./${defaultName}`)
+    const name = await textPrompt('Restore file to: ', `./${defaultName}`)
     const fullpath = FileServices.resolvePath(name)
 
     const content = await db.getBinary(id)

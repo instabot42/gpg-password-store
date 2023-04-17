@@ -1,5 +1,5 @@
 import { copyToClipboard } from '../common/clip.js'
-import * as input from '../common/input.js'
+import editor from '../input/editor.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
 import pickName from '../input/pick-name.js'
@@ -23,7 +23,7 @@ export default async function insertCommand(options) {
 
     // Ask about extra notes
     const wantNotes = await yesNo('Do you want to add notes?', 'Add Notes', 'Nope')
-    const notes = wantNotes ? await input.editor('') : ''
+    const notes = wantNotes ? await editor('') : ''
 
     // combine all responses into a single doc
     const fullEntry = `${entryName}\n\nUsername: ${username}\nPassword: ${pass}\n\n${notes}`
