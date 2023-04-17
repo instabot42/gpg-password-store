@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import terminal from 'terminal-kit'
 import { Command } from 'commander'
 import { clearClipboardIfNeeded, disableClipboard, hasClipboardBeenChanged } from './common/clip.js'
+import { styles, term } from './input/terminal.js'
 
 import showCommand from './commands/show.js'
 import initCommand from './commands/init.js'
@@ -12,70 +12,53 @@ import insertFileCommand from './commands/file.js'
 import deleteCommand from './commands/delete.js'
 import generatePasswordCommand from './commands/generate-password.js'
 import listCommand from './commands/list.js'
-import { styles } from './input/terminal.js'
 
-const term = terminal.terminal
 const program = new Command()
 
-// generic ctrl-c handler to terminate
-term.on('key', function (name, matches, data) {
-    if (name === 'CTRL_C') {
-        term.red('\nTerminating by ctrl-c (clipboard may not be cleared)\n')
-        term.grabInput(false)
-        setTimeout(function () {
-            process.exit()
-        }, 100)
-    }
-})
 
 // Clear the clipboard after a while
 function clipboardProgressBar() {
     if (!hasClipboardBeenChanged()) {
-        term.grabInput(false)
         return
     }
 
+    // progress bar settings
     let progress = 0
     const timeStep = 100
 
-    // capture input
-    term.grabInput(true)
-    term.on('key', function (name) {
-        if (name === 'ESCAPE') {
-            progress = 2
-        }
-    })
+    // Some escape sequences to draw stuff
+    const ESC = '\u001b['
+    const clearLine = `${ESC}2K${ESC}${1}G`
+    const hide = `${ESC}?25l`
+    //const show = `${ESC}?25h`
 
-    // create a progress bar
-    const progressBar = term.progressBar({
-        width: 80,
-        title: 'Clearing clipboard in...',
-        eta: true,
-        percent: true,
-    })
+    // Hide the cursor
+    term.write(hide)
 
-    // called every 100ms to update
+    // A timeout that will draw some progress
     function doProgress() {
         progress += timeStep / 15000
+        if (progress > 1) {
+            setTimeout(() => {
+                // clear clipboard if we used it...
+                clearClipboardIfNeeded()
+                term.write(clearLine)
+                term.muted('clipboard cleared\n')
+            }, timeStep)
+        } else {
+            setTimeout(doProgress, 50)
+        }
 
         // if we clear the clipboard on some time along the way, we can exit now
         if (!hasClipboardBeenChanged()) {
             progress = 2
         }
 
-        progressBar.update(progress)
-        if (progress > 1) {
-            setTimeout(() => {
-                // clear clipboard if we used it...
-                clearClipboardIfNeeded()
-
-                // release the input
-                term.grabInput(false)
-                term('\n')
-            }, timeStep)
-        } else {
-            setTimeout(doProgress, timeStep)
-        }
+        // draw some progress
+        const dots = Math.floor((1 + Math.sin(progress * 2 * 3.1415 * 4)) * 5)
+        term.write(clearLine)
+        term.muted('Waiting for clipboard to clear:')
+        term.warning(`${'='.repeat(dots+1)}`)
     }
 
     doProgress()
@@ -106,7 +89,9 @@ program
         'name / ID of the GPG keypairs that will be used for encryption/decryption.'
     )
     .description(
-        styles.info('Create the target folder that will be used to store everything, and define which GPG keys will be used for encryption / decryption. To encrypt to many key pairs, comma separate them')
+        styles.info(
+            'Create the target folder that will be used to store everything, and define which GPG keys will be used for encryption / decryption. To encrypt to many key pairs, comma separate them'
+        )
     )
     .action(async (gpgKeyPair) => initCommand(gpgKeyPair, program.opts()))
 
@@ -178,7 +163,6 @@ program
     .description(styles.info('List all the passwords'))
     .action(async (search, options) => listCommand(search, { ...program.opts(), ...options }))
 
-
 // pass setting downloads path
 // sets the default downloads folder where files will be restored to
 
@@ -191,5 +175,5 @@ try {
     // go go go...
     await program.parseAsync(process.argv)
 } catch (err) {
-    term.brightRed.error(`${err.message}\n`)
+    term.error(`${err.message}\n`)
 }
