@@ -67,9 +67,6 @@ npm ci
 You don't need to set anything up here to use gpg-password-store, but you can override some defaults using these environment vars if you like.
 
 -   GPG_PASS_DIR - the full path to the folder to store passwords in (default `~/.gpg-store`)
--   GPG_PASS_WORD_COUNT - When generating passwords, how many words should be used (can be overriden with cli args) (default 5)
--   GPG_PASS_MAX_WORD_LEN - Max length of each of the words used (default 10)
--   GPG_PASS_JOIN_TEXT - the text used between each word. Set this to 'true' and a random special char will be used each time (default '.')
 
 ### Windows Setup
 
@@ -108,8 +105,8 @@ Note that key names that contain spaces will need to be quoted.
 
 `pass insert`
 
-Give a name for the entry - this is how you will identify the password in the future
-Enter the username and password.
+Give a name for the entry - this is how you will identify the password in the future.
+Enter the username and either manually enter a password, or have one generated for you using many criteria.
 Optionally add some additional text that will be stored with the entry
 
 The new password will be copied to the clipboard (but only for 15 seconds)
@@ -152,7 +149,17 @@ Choose the entry to delete, and complete the endless 'are you sure' steps.
 
 `pass generate-password` or just `pass g`
 
-It will not be stored anywhere.
+Generates a selection of random passwords with options to control how.
+The selected random password will be copied to the clipboard (for 15 seconds), but not stored anywhere.
+Password generation options include:
+
+* random letters / numbers, or set of words
+* length / number of words
+* character types to be used / word length
+* for word lists, add numbers and control how words are joined.
+* Example random letters (16 letters): `zD8|cXY)udfOE7jv`
+* Example random words (4 words): `Prone#678%Bourgeoisie#Toothbrush%Discrepancy%247`
+* Example random words (4 short words, dots to join them): `Gill.Swung.772.Hairy.Ague.273`
 
 #### Add a file to the DB
 

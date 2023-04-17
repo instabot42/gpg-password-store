@@ -1,12 +1,13 @@
-import terminal from 'terminal-kit'
 import { copyToClipboard } from '../common/clip.js'
-import * as input from '../common/input.js'
+import editor from '../input/editor.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
-import pickName from '../common/pick-name.js'
+import pickName from '../input/pick-name.js'
 import Gpg from '../common/gpg.js'
-
-const term = terminal.terminal
+import term from '../input/terminal.js'
+import password from '../input/password.js'
+import textPrompt from '../input/text-prompt.js'
+import yesNo from '../input/yes-no.js'
 
 export default async function insertCommand(options) {
     const db = new Database(FileServices, Gpg)
@@ -14,32 +15,26 @@ export default async function insertCommand(options) {
     // Pick a unique name for the record
     const entryName = await pickName(db)
 
-    term.brightGreen('Username: ')
-    const username = await input.username()
+    // Ask the username
+    const username = await textPrompt('Username:')
 
     // ask for a password, or generate one
-    term.brightGreen('\nPassword (tab to generate one): ')
-    const password = await input.password(
-        options.wordCount,
-        options.maxWordLen,
-        options.randomJoin ? true : options.joinText
-    )
+    const pass = await password()
 
     // Ask about extra notes
-    term.brightGreen('\nDo you want to add notes (y/N)\n')
-    const wantNotes = await input.yesNo()
-    const notes = wantNotes ? await input.editor('') : ''
+    const wantNotes = await yesNo('Do you want to add notes?', 'Add Notes', 'Nope')
+    const notes = wantNotes ? await editor('') : ''
 
     // combine all responses into a single doc
-    const fullEntry = `${entryName}\n\nUsername: ${username}\nPassword: ${password}\n\n${notes}`
+    const fullEntry = `${entryName}\n\nUsername: ${username}\nPassword: ${pass}\n\n${notes}`
 
     // encrypt it
-    term.dim.white('\nWriting...\n')
+    term.muted('\nWriting...\n')
     await db.insert(entryName, fullEntry)
-    term.dim.white('Encrypted and saved\n\n')
-    term.brightCyan(fullEntry)
+    term.muted('Encrypted and saved\n\n')
+    term.write(fullEntry)
 
     // clipboard
-    term.brightCyan(`Password copied to clipboard\n`)
-    copyToClipboard(password)
+    term.result(`Password copied to clipboard\n`)
+    copyToClipboard(pass)
 }

@@ -1,13 +1,12 @@
-import terminal from 'terminal-kit'
 import { copyToClipboard } from '../common/clip.js'
-import { listItems, filename } from '../common/input.js'
-import findRecordFromTitle from '../common/find-record.js'
+import findRecordFromTitle from '../input/find-record.js'
+import pickField from '../input/pick-field.js'
 import Database from '../common/db.js'
 import FileServices from '../common/file-services.js'
 import Gpg from '../common/gpg.js'
 import generateOTP from '../common/totp.js'
-
-const term = terminal.terminal
+import term from '../input/terminal.js'
+import textPrompt from '../input/text-prompt.js'
 
 /**
  *
@@ -41,14 +40,13 @@ function extractItems(content) {
  * @param {*} defaultName
  */
 async function restoreFile(db, id, defaultName) {
-    term.brightGreen('Restore file to: ')
-    const name = await filename(`./${defaultName}`)
+    const name = await textPrompt('Restore file to: ', `./${defaultName}`)
     const fullpath = FileServices.resolvePath(name)
 
     const content = await db.getBinary(id)
 
     const finalName = FileServices.writeFileFullPathWithRefCount(fullpath, content)
-    term.brightYellow(`Wrote content to ${finalName}\n`)
+    term.result(`Wrote content to ${finalName}\n`)
 }
 
 /**
@@ -64,7 +62,7 @@ export default async function showCommand(defaultTitle, options) {
 
     // Find the title and show that
     const FullTitle = await db.idToTitle(id)
-    term.brightYellow(`${FullTitle}\n`)
+    term.info(`${FullTitle}\n`)
 
     // fetch the content
     const filename = await db.idToFilename(id)
@@ -76,7 +74,7 @@ export default async function showCommand(defaultTitle, options) {
 
     // Show it
     if (options.showAll) {
-        term.noFormat(`${content}\n`)
+        term.write(`${content}\n`)
     }
 
     // skip the clipboard?
@@ -89,59 +87,42 @@ export default async function showCommand(defaultTitle, options) {
     let keepGoing = true
     let selectedIndex = 0
     while (keepGoing) {
-        // show the list of items to copy to the clipboard
-        term.brightGreen('Copy fields to clipboard? (ESC to abort)')
-
-        // mask password on-screen
-        const mappedItems = items.map((i) => {
-            const n = i.name.toLowerCase()
-            if (
-                n.includes('pass') ||
-                n.includes('2fa') ||
-                n.includes('pin') ||
-                n.includes('totp')
-            ) {
-                return `${i.name} => ************`
-            }
-
-            return `${i.name} => ${i.value}`
-        })
-
-        // add an entry to show everything
-        mappedItems.push('Show Full Record')
-
-        const result = await listItems(mappedItems, selectedIndex)
+        const index = await pickField(items, selectedIndex)
+        if (index === null) {
+            return
+        }
 
         // copy it and go around again, or cancel
-        if (result?.canceled) {
-            keepGoing = false
+        if (index > items.length - 1) {
+            selectedIndex = 0
+            term.write(`${content}\n`)
         } else {
-            const index = result.selectedIndex
-            if (index > items.length - 1) {
-                selectedIndex = 0
-                term.noFormat(`${content}\n`)
-            } else {
-                const name = items[index].name
-                let value = items[index].value
+            const name = items[index].name
+            const value = convertValue(name, items[index].value)
 
-                // one time password gen?
-                if (name.toLowerCase().includes('totp')) {
-                    value = generateOTP(value, Date.now())
-                    term.brightCyan(`\nOne Time Password generated to clipboard:\n`)
-                    term.brightYellow(`${value.slice(0, 3)} ${value.slice(3)}\n`)
+            // copy to clipboard
+            copyToClipboard(value)
+            term.result(`\n>>'${name}' copied<<\n\n`)
 
-                    const time = Math.floor(Date.now() / 1000)
-                    const age = time - Math.floor(time / 30) * 30
-                    term.dim(`Valid for ${30 - age} seconds\n`)
-                }
-
-                // copy to clipboard
-                copyToClipboard(value)
-                term.brightCyan(`\n>>'${name}' copied<<\n\n`)
-
-                // default to the next entry
-                selectedIndex = index + 1
-            }
+            // default to the next entry
+            selectedIndex = index + 1
         }
     }
+}
+
+function convertValue(name, v) {
+    // one time password gen?
+    if (name.toLowerCase().includes('totp')) {
+        const value = generateOTP(v, Date.now())
+        term.info(`\nOne Time Password generated to clipboard:\n`)
+        term.result(`${value.slice(0, 3)} ${value.slice(3)}\n`)
+
+        const time = Math.floor(Date.now() / 1000)
+        const age = time - Math.floor(time / 30) * 30
+        term.muted(`Valid for ${30 - age} seconds\n`)
+
+        return value
+    }
+
+    return v;
 }

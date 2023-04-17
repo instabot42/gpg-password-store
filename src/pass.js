@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import terminal from 'terminal-kit'
 import { Command } from 'commander'
 import { clearClipboardIfNeeded, disableClipboard, hasClipboardBeenChanged } from './common/clip.js'
+import { styles, term } from './input/terminal.js'
 
 import showCommand from './commands/show.js'
 import initCommand from './commands/init.js'
@@ -13,74 +13,52 @@ import deleteCommand from './commands/delete.js'
 import generatePasswordCommand from './commands/generate-password.js'
 import listCommand from './commands/list.js'
 
-const term = terminal.terminal
 const program = new Command()
 
-// override defaults from env
-const defaultWordCount = +(process.env.GPG_PASS_WORD_COUNT || 5)
-const defaultMaxWordLen = +(process.env.GPG_PASS_MAX_WORD_LEN || 10)
-const defaultJoinText = process.env.GPG_PASS_JOIN_TEXT || '.'
-const defaultRandomJoin = defaultJoinText.toLowerCase() === 'true'
-
-// generic ctrl-c handler to terminate
-term.on('key', function (name, matches, data) {
-    if (name === 'CTRL_C') {
-        term.red('\nTerminating by ctrl-c (clipboard may not be cleared)\n')
-        term.grabInput(false)
-        setTimeout(function () {
-            process.exit()
-        }, 100)
-    }
-})
 
 // Clear the clipboard after a while
 function clipboardProgressBar() {
     if (!hasClipboardBeenChanged()) {
-        term.grabInput(false)
         return
     }
 
+    // progress bar settings
     let progress = 0
     const timeStep = 100
 
-    // capture input
-    term.grabInput(true)
-    term.on('key', function (name) {
-        if (name === 'ESCAPE') {
-            progress = 2
-        }
-    })
+    // Some escape sequences to draw stuff
+    const ESC = '\u001b['
+    const clearLine = `${ESC}2K${ESC}${1}G`
+    const hide = `${ESC}?25l`
+    //const show = `${ESC}?25h`
 
-    // create a progress bar
-    const progressBar = term.progressBar({
-        width: 80,
-        title: 'Clearing clipboard in...',
-        eta: true,
-        percent: true,
-    })
+    // Hide the cursor
+    term.write(hide)
 
-    // called every 100ms to update
+    // A timeout that will draw some progress
     function doProgress() {
         progress += timeStep / 15000
+        if (progress > 1) {
+            setTimeout(() => {
+                // clear clipboard if we used it...
+                clearClipboardIfNeeded()
+                term.write(clearLine)
+                term.muted('clipboard cleared\n')
+            }, timeStep)
+        } else {
+            setTimeout(doProgress, 50)
+        }
 
         // if we clear the clipboard on some time along the way, we can exit now
         if (!hasClipboardBeenChanged()) {
             progress = 2
         }
 
-        progressBar.update(progress)
-        if (progress > 1) {
-            setTimeout(() => {
-                // clear clipboard if we used it...
-                clearClipboardIfNeeded()
-
-                // release the input
-                term.grabInput(false)
-                term('\n')
-            }, timeStep)
-        } else {
-            setTimeout(doProgress, timeStep)
-        }
+        // draw some progress
+        const dots = Math.floor((1 + Math.sin(progress * 2 * 3.1415 * 4)) * 5)
+        term.write(clearLine)
+        term.muted('Waiting for clipboard to clear:')
+        term.warning(`${'='.repeat(dots+1)}`)
     }
 
     doProgress()
@@ -89,8 +67,8 @@ function clipboardProgressBar() {
 // Declare the program
 program
     .name('pass')
-    .description('A simple password manager / store that leans on GPG')
-    .version('1.6.1')
+    .description(styles.warning('A simple password manager / store that leans on GPG'))
+    .version(styles.warning('1.6.1'))
     .option('-k, --skip-clipboard', 'skip the clipboard')
     .hook('preAction', (thisCommand, actionCommand) => {
         const opts = program.opts()
@@ -111,7 +89,9 @@ program
         'name / ID of the GPG keypairs that will be used for encryption/decryption.'
     )
     .description(
-        'Create the target folder that will be used to store everything, and define which GPG keys will be used for encryption / decryption. To encrypt to many key pairs, comma separate them'
+        styles.info(
+            'Create the target folder that will be used to store everything, and define which GPG keys will be used for encryption / decryption. To encrypt to many key pairs, comma separate them'
+        )
     )
     .action(async (gpgKeyPair) => initCommand(gpgKeyPair, program.opts()))
 
@@ -120,35 +100,15 @@ program
     .command('insert')
     .alias('i')
     .alias('add')
-    .option(
-        '-w, --word-count <wordcount>',
-        'how many words should the password contain',
-        defaultWordCount
-    )
-    .option(
-        '-m, --max-word-len <maxlen>',
-        'the maximum length of each word used (can be shorted, but no longer)',
-        defaultMaxWordLen
-    )
-    .option(
-        '-j, --join-text <jointext>',
-        'the character (or characters) used between each word',
-        defaultJoinText
-    )
-    .option(
-        '-r, --random-join',
-        'use a random special character between each pair of words (overrides -j',
-        defaultRandomJoin
-    )
-    .description('Insert a new password into the DB')
-    .action(async (options) => insertCommand({ ...program.opts(), ...options }))
+    .description(styles.info('Insert a new password into the DB'))
+    .action(async () => insertCommand())
 
 // Insert a file
 program
     .command('file')
     .argument('filename', 'the path of the file to store')
-    .description('Store a file in the encrypted data store')
-    .action(async (filename) => insertFileCommand(filename, { ...program.opts() }))
+    .description(styles.info('Store a file in the encrypted data store'))
+    .action(async (filename) => insertFileCommand(filename))
 
 // The show command
 program
@@ -158,7 +118,7 @@ program
     .alias('g')
     .argument('[entryName]', 'the name of the entry to lookup', '')
     .option('-s, --show-all', 'Output the whole entry to the terminal', false)
-    .description('Search for and show password details')
+    .description(styles.info('Search for and show password details'))
     .action(async (entryName, options) => showCommand(entryName, { ...program.opts(), ...options }))
 
 // The edit command
@@ -166,14 +126,14 @@ program
     .command('edit')
     .alias('e')
     .argument('[entryName]', 'the name of the entry to lookup', '')
-    .description('Edit an existing entry')
+    .description(styles.info('Edit an existing entry'))
     .action(async (entryName) => editCommand(entryName, program.opts()))
 
 // The rename command
 program
     .command('rename')
     .argument('[entryName]', 'the name / part name of the entry to rename', '')
-    .description('Change the name of an entry')
+    .description(styles.info('Change the name of an entry'))
     .action(async (entryName) => renameCommand(entryName, program.opts()))
 
 // The Delete command
@@ -181,35 +141,15 @@ program
     .command('delete')
     .alias('rm')
     .argument('[entryName]', 'the name of the entry to lookup', '')
-    .description('Delete an item from the store')
+    .description(styles.info('Delete an item from the store'))
     .action(async (entryName) => deleteCommand(entryName, program.opts()))
 
 // The Generate Password command
 program
     .command('generate-password')
     .alias('gen')
-    .option(
-        '-w, --word-count <wordcount>',
-        'how many words should the password contain',
-        defaultWordCount
-    )
-    .option(
-        '-m, --max-word-len <maxlen>',
-        'the maximum length of each word used (can be shorted, but no longer)',
-        defaultMaxWordLen
-    )
-    .option(
-        '-j, --join-text <jointext>',
-        'the character (or characters) used between each word',
-        defaultJoinText
-    )
-    .option(
-        '-r, --random-join',
-        'use a random special character between each pair of words (overrides -j',
-        defaultRandomJoin
-    )
-    .description('Generate a random password, show it and copy it to the clipboard')
-    .action(async (options) => generatePasswordCommand({ ...program.opts(), ...options }))
+    .description(styles.info('Generate a random password, show it and copy it to the clipboard'))
+    .action(async () => generatePasswordCommand())
 
 // The List all passwords command
 program
@@ -220,14 +160,8 @@ program
     .option('-c, --sort-created', 'Sort by creation date (oldest first)')
     .option('-m, --sort-modified', 'Sort by modified date (oldest first)')
     .option('-a, --sort-accessed', 'Sort by last accessed date (oldest first)')
-    .description('List all the passwords')
+    .description(styles.info('List all the passwords'))
     .action(async (search, options) => listCommand(search, { ...program.opts(), ...options }))
-
-// Files
-// pass file filename
-// Would read the file and write an encrypted copy of it into the password store
-// The entry would be marked as a file and the original filename remembered
-// When you get an entry and we see if it is a file, it should write it to the 'downloads' folder
 
 // pass setting downloads path
 // sets the default downloads folder where files will be restored to
@@ -241,5 +175,5 @@ try {
     // go go go...
     await program.parseAsync(process.argv)
 } catch (err) {
-    term.brightRed.error(`${err.message}\n`)
+    term.error(`${err.message}\n`)
 }

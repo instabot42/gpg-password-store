@@ -1,7 +1,6 @@
-import terminal from 'terminal-kit'
 import { v4 as uuidv4 } from 'uuid'
+import term from '../input/terminal.js'
 
-const term = terminal.terminal
 const currentDBVersion = 3
 const dbFilename = 'db'
 
@@ -42,8 +41,8 @@ export default class Database {
             }
 
             // show what we are changing
-            term.dim(`Updating keys\nfrom ${this.db.gpgIds.join(', ')}\n`)
-            term.dim(`to   ${newKeys.join(', ')}\n`)
+            term.muted(`Updating keys\nfrom ${this.db.gpgIds.join(', ')}\n`)
+            term.muted(`to   ${newKeys.join(', ')}\n`)
 
             // update and save
             this.db.gpgIds = newKeys
@@ -76,7 +75,7 @@ export default class Database {
         if (!this.fs.fileExists(dbFilename)) {
             // See if the old version of the file is still there (we changed from .db to db at some point)
             if (this.fs.fileExists('.db')) {
-                term.dim('Found legacy DB file - moved to new version...\n')
+                term.muted('Found legacy DB file - moved to new version...\n')
                 this.fs.renameFile('.db', dbFilename)
             } else {
                 throw new Error("DB not found. use 'pass init' to setup DB")
@@ -84,7 +83,7 @@ export default class Database {
         }
 
         // notice, so we know to touch a yubikey
-        term.dim('Decrypting db...\n')
+        term.muted('Decrypting db...\n')
 
         const dbEncrypted = this.fs.readFile(dbFilename)
         const dbJson = await this.gpg.decryptToString(dbEncrypted)
@@ -305,7 +304,7 @@ export default class Database {
         this.db.passwords[i].accessedAt = Date.now()
         await this.save()
 
-        term.dim('Decrypting record...\n')
+        term.muted('Decrypting record...\n')
 
         // get the contents of id (decrypted)
         return this.fs.readFile(id)
@@ -441,7 +440,7 @@ export default class Database {
     async reEncyptAll() {
         await this.load()
         for (const p of this.db.passwords) {
-            term.white(`re-encrypting ${p.title}\n`)
+            term.bright(`re-encrypting ${p.title}\n`)
             const content = await this.get(p.id)
             await this.update(p.id, content, false)
         }
