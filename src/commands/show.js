@@ -114,7 +114,7 @@ export default async function showCommand(defaultTitle, options) {
 function convertValue(name, v) {
     // one time password gen?
     if (name.toLowerCase().includes('totp')) {
-        const value = generateOTP(value, Date.now())
+        const value = generateOTP(v, Date.now())
         term.info(`\nOne Time Password generated to clipboard:\n`)
         term.result(`${value.slice(0, 3)} ${value.slice(3)}\n`)
 
