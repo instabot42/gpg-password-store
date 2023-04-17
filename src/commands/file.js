@@ -5,7 +5,7 @@ import Gpg from '../common/gpg.js'
 import term from '../input/terminal.js'
 
 
-export default async function insertFileCommand(filename, options) {
+export default async function insertFileCommand(filename) {
     const db = new Database(FileServices, Gpg)
 
     const fullpath = FileServices.resolvePath(filename)

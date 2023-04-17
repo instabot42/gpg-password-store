@@ -3,7 +3,7 @@ import { copyToClipboard } from '../common/clip.js'
 import { passwordColoured } from '../common/password-highlight.js'
 import { term } from '../input/terminal.js'
 
-export default async function generatePasswordCommand(options) {
+export default async function generatePasswordCommand() {
     // Make a new password, copy it to the clipboard and log it out
     const pass = await password(true)
 

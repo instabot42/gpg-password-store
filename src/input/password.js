@@ -187,7 +187,7 @@ async function pickFromPasswordSelection(genPassword) {
  */
 async function manualPassword() {
     const prompt = new enquirer.Input({
-        message: 'Enter your new password...',
+        message: styles.heading('Enter your new password...'),
     })
 
     const result = await prompt.run()

@@ -88,7 +88,6 @@ export default async function showCommand(defaultTitle, options) {
     let keepGoing = true
     let selectedIndex = 0
     while (keepGoing) {
-        // const result = await listItems(mappedItems, selectedIndex)
         const index = await pickField(items, selectedIndex)
         if (index === null) {
             return

@@ -17,12 +17,6 @@ import { styles } from './input/terminal.js'
 const term = terminal.terminal
 const program = new Command()
 
-// override defaults from env
-const defaultWordCount = +(process.env.GPG_PASS_WORD_COUNT || 5)
-const defaultMaxWordLen = +(process.env.GPG_PASS_MAX_WORD_LEN || 10)
-const defaultJoinText = process.env.GPG_PASS_JOIN_TEXT || '.'
-const defaultRandomJoin = defaultJoinText.toLowerCase() === 'true'
-
 // generic ctrl-c handler to terminate
 term.on('key', function (name, matches, data) {
     if (name === 'CTRL_C') {
@@ -121,35 +115,15 @@ program
     .command('insert')
     .alias('i')
     .alias('add')
-    .option(
-        '-w, --word-count <wordcount>',
-        'how many words should the password contain',
-        defaultWordCount
-    )
-    .option(
-        '-m, --max-word-len <maxlen>',
-        'the maximum length of each word used (can be shorted, but no longer)',
-        defaultMaxWordLen
-    )
-    .option(
-        '-j, --join-text <jointext>',
-        'the character (or characters) used between each word',
-        defaultJoinText
-    )
-    .option(
-        '-r, --random-join',
-        'use a random special character between each pair of words (overrides -j',
-        defaultRandomJoin
-    )
     .description(styles.info('Insert a new password into the DB'))
-    .action(async (options) => insertCommand({ ...program.opts(), ...options }))
+    .action(async () => insertCommand())
 
 // Insert a file
 program
     .command('file')
     .argument('filename', 'the path of the file to store')
     .description(styles.info('Store a file in the encrypted data store'))
-    .action(async (filename) => insertFileCommand(filename, { ...program.opts() }))
+    .action(async (filename) => insertFileCommand(filename))
 
 // The show command
 program
@@ -189,28 +163,8 @@ program
 program
     .command('generate-password')
     .alias('gen')
-    .option(
-        '-w, --word-count <wordcount>',
-        'how many words should the password contain',
-        defaultWordCount
-    )
-    .option(
-        '-m, --max-word-len <maxlen>',
-        'the maximum length of each word used (can be shorted, but no longer)',
-        defaultMaxWordLen
-    )
-    .option(
-        '-j, --join-text <jointext>',
-        'the character (or characters) used between each word',
-        defaultJoinText
-    )
-    .option(
-        '-r, --random-join',
-        'use a random special character between each pair of words (overrides -j',
-        defaultRandomJoin
-    )
     .description(styles.info('Generate a random password, show it and copy it to the clipboard'))
-    .action(async (options) => generatePasswordCommand({ ...program.opts(), ...options }))
+    .action(async () => generatePasswordCommand())
 
 // The List all passwords command
 program

@@ -6,6 +6,8 @@ import pickName from '../input/pick-name.js'
 import Gpg from '../common/gpg.js'
 import term from '../input/terminal.js'
 import password from '../input/password.js'
+import textPrompt from '../input/text-prompt.js'
+import yesNo from '../input/yes-no.js'
 
 export default async function insertCommand(options) {
     const db = new Database(FileServices, Gpg)
@@ -13,15 +15,14 @@ export default async function insertCommand(options) {
     // Pick a unique name for the record
     const entryName = await pickName(db)
 
-    term.heading('Username: ')
-    const username = await input.username()
+    // Ask the username
+    const username = await textPrompt('Username:')
 
     // ask for a password, or generate one
     const pass = await password()
 
     // Ask about extra notes
-    term.heading('\nDo you want to add notes (y/N)\n')
-    const wantNotes = await input.yesNo()
+    const wantNotes = await yesNo('Do you want to add notes?', 'Add Notes', 'Nope')
     const notes = wantNotes ? await input.editor('') : ''
 
     // combine all responses into a single doc
