@@ -53,6 +53,7 @@ export default async function listCommand(search, options) {
     const keys = await db.getKeyIds()
     term.muted(`Found ${sorted.length} matching entries, encrypted with ${keyCount} GPG key.\n`)
     term.muted(`Keys: ${keys.join(', ')}\n`)
+    term.muted(`Path: ${FileServices.getBaseFolder()}\n`)
     if (sorted.length === 0) {
         term.result('  empty\n')
     } else {
