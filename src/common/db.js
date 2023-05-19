@@ -78,7 +78,7 @@ export default class Database {
                 term.muted('Found legacy DB file - moved to new version...\n')
                 this.fs.renameFile('.db', dbFilename)
             } else {
-                throw new Error("DB not found. use 'pass init' to setup DB")
+                throw new Error(`DB not found in ${this.fs.getBaseFolder()}.\nuse 'pass init' to setup DB`)
             }
         }
 

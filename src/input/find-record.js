@@ -1,5 +1,6 @@
 import { styles } from './terminal.js'
 import AutoCompleteTimeout from './autocomplete-timeout.js'
+import term from '../input/terminal.js'
 
 export default async function findRecordFromTitle(db, defaultTitle) {
     // See if we get an exact match
@@ -8,22 +9,26 @@ export default async function findRecordFromTitle(db, defaultTitle) {
         return id
     }
 
-    try {
-        // Find all the DB entries...
-        const all = await db.all()
+    // Find all the DB entries...
+    const all = await db.all()
 
-        // Attempt to autocomplete...
-        const autoComplete = findPerfectMatch(defaultTitle, all)
-        if (autoComplete) {
-            // Only one matching result, so try that...
-            id = await db.titleToId(autoComplete)
-            if (id) {
-                return id
-            }
+    // Attempt to autocomplete...
+    const autoComplete = findPerfectMatch(defaultTitle, all)
+    if (autoComplete) {
+        // Only one matching result, so try that...
+        id = await db.titleToId(autoComplete)
+        if (id) {
+            return id
         }
+    }
 
-        // no match yet, so ask the user
-        const choices = all.map((r) => ({ name: r.title }))
+    // no match yet, so ask the user
+    const choices = all.map((r) => ({ name: r.title }))
+    if (choices.length === 0) {
+        throw new Error('No matching records found')
+    }
+
+    try {
         const prompt = new AutoCompleteTimeout({
             message: styles.heading('Choose record'),
             footer: styles.warning('================'),
@@ -40,13 +45,12 @@ export default async function findRecordFromTitle(db, defaultTitle) {
         throw new Error(`Cancelled...`)
     }
 
-    if (id === null) {
+    if (!id) {
         throw new Error(`No matching entry found`)
     }
 
     return id
 }
-
 
 function findPerfectMatch(inputStr, all) {
     // no input = no matches
