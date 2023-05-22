@@ -20,6 +20,6 @@
   "devDependencies": {
     "chai-as-promised": "^7.1.1",
     "mocha": "^10.2.0",
-    "sinon": "^15.0.4"
+    "sinon": "^15.1.0"
   }
 }
