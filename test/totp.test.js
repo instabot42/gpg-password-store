@@ -1,11 +1,8 @@
-import sinon from 'sinon'
-import chai from 'chai'
+import {expect, use} from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import generateOTP from '../src/common/totp.js'
 
-chai.use(chaiAsPromised)
-const expect = chai.expect
-const assert = sinon.assert
+use(chaiAsPromised)
 
 describe('Database', () => {
     beforeEach(() => {})
