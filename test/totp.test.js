@@ -4,7 +4,7 @@ import generateOTP from '../src/common/totp.js'
 
 use(chaiAsPromised)
 
-describe('Database', () => {
+describe('TOPT', () => {
     beforeEach(() => {})
 
     afterEach(() => {})
