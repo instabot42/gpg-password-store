@@ -111,20 +111,19 @@ export default class FileServices {
         const timestamp = Date.now().valueOf()
         const backupName = `bak/${filename}.${timestamp}.bak`
 
-        // remove the existing backup file (if it exists)
-        if (FileServices.fileExists(backupName)) {
-            fs.unlinkSync(`${baseDir}${backupName}`)
-        }
+        // Copy the existing file to a backup location
+        FileServices.copyFile(filename, backupName)
 
-        // move the existing file to the backup file
-        FileServices.renameFile(filename, backupName)
-
-        // write the new file
+        // Replace it with the new content
         return FileServices.writeFile(filename, content)
     }
 
     static renameFile(from, to) {
         fs.renameSync(`${baseDir}${from}`, `${baseDir}${to}`)
+    }
+
+    static copyFile(from, to) {
+        fs.copyFileSync(`${baseDir}${from}`, `${baseDir}${to}`)
     }
 
     static rotateBackupFolder() {
