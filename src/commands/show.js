@@ -124,5 +124,14 @@ function convertValue(name, v) {
         return value
     }
 
+    // Show the letters and their numbers for 'enter character 2 and 7 from your memorable word' systems
+    // Puts the complete value into the clipboard, but shows all the separate letters on the terminal
+    if (name.toLowerCase().includes('##')) {
+        const parts = v.split('')
+        term.info(`\nLetters:\n`)
+        parts.forEach((p, i) => term.result(`${i+1}: ${p}\n`))
+        return v
+    }
+
     return v;
 }
