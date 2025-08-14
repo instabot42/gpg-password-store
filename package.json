@@ -15,7 +15,7 @@
     "commander": "^13.1.0",
     "enquirer": "^2.4.1",
     "external-editor": "^3.1.0",
-    "uuid": "^11.0.5"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "chai": "^5.1.2",
