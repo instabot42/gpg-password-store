@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "chai": "^5.2.1",
-    "chai-as-promised": "^8.0.1",
+    "chai-as-promised": "^8.0.2",
     "mocha": "^11.7.1",
     "sinon": "^21.0.0"
   }
