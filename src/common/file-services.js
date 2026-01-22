@@ -38,17 +38,25 @@ export default class FileServices {
         return false
     }
 
+    static fullPathFromFilename(filename) {
+        return `${baseDir}${filename}`
+    }
+
     static fileExists(filename) {
         return FileServices.fullPathExists(`${baseDir}${filename}`)
     }
 
-    static deleteFile(filename) {
+    static deleteFileRaw(filename) {
         try {
-            fs.unlinkSync(`${baseDir}${filename}`)
+            fs.unlinkSync(filename)
             return true
         } catch (err) {
             return false
         }
+    }
+
+    static deleteFile(filename) {
+        return FileServices.deleteFileRaw(`${baseDir}${filename}`)
     }
 
     static createBaseFolder() {
@@ -66,6 +74,11 @@ export default class FileServices {
 
     static pathSeparator() {
         return path.sep
+    }
+
+    static generateTempFilename() {
+        const tmpFile = path.join(os.tmpdir(), `tmp-edit-${Date.now()}.txt`);
+        return tmpFile
     }
 
     static writeFileFullPathWithRefCount(fullpath, content) {
@@ -88,6 +101,10 @@ export default class FileServices {
 
     static writeFile(filename, content) {
         return fs.writeFileSync(`${baseDir}${filename}`, content)
+    }
+
+    static writeFileRaw(fullPath, content) {
+        return fs.writeFileSync(fullPath, content)
     }
 
     static readFileRaw(fullPath) {

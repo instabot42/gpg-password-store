@@ -6,6 +6,9 @@ import Gpg from '../common/gpg.js'
 import term from '../input/terminal.js'
 
 export default async function editCommand(defaultName, options) {
+    term.warning(`NOTE: this feature will write a decrypted copy of this record to your OS tmp folder\n`);
+    term.warning(`It is deleted when you close the editor. Errors in deletion are reported to you\n`);
+
     // See if the title given is a match
     const db = new Database(FileServices, Gpg)
     const id = await findRecordFromTitle(db, defaultName)
